@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "affective-cities"
-include ':app'
+rootProject.name = "drift"
+include(":app")

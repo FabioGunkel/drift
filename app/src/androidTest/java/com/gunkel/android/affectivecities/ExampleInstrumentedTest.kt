@@ -1,4 +1,4 @@
-package com.gunkel.android.affectivecities
+package com.gunkel.android.drift
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.gunkel.android.affectivecities", appContext.packageName)
+        assertEquals("com.gunkel.android.drift", appContext.packageName)
     }
 }

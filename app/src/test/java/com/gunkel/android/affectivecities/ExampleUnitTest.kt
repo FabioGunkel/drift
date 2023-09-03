@@ -1,4 +1,4 @@
-package com.gunkel.android.affectivecities
+package com.gunkel.android.drift
 
 import org.junit.Test
 
