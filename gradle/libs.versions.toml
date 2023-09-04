@@ -1,0 +1,24 @@
+
+
+[versions]
+
+#Android
+androidApi = "34"
+
+#Core libs
+ktx = "1.10.1"
+app-compat = "1.6.1"
+material = "1.9.0"
+
+#Test
+junit = "4.13.2"
+junit-ext = "1.1.5"
+espresso = "3.4.0"
+
+[libraries]
+androidx-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "ktx" }
+androidx-compat = { group = "androidx.appcompat", name = "appcompat", version.ref = "app-compat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+junit-ext = { group = "androidx.test.ext", name = "junit", version.ref = "junit-ext" }
+espresso = { group = "androidx.test.espresso", name = "espresso", version.ref = "espresso" }
