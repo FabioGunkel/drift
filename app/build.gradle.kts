@@ -1,11 +1,12 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+
 }
 
 android {
     namespace = "com.gunkel.android.drift"
-    compileSdk = 34
+    compileSdk = libs.versions.androidSdk.get().toInt()
 
     defaultConfig {
         applicationId = "com.gunkel.android.drift"
