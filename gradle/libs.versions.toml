@@ -3,7 +3,9 @@
 [versions]
 
 #Android
-androidSdk = "34"
+androidCompileSdk = "34"
+androidTargetSdk = "33"
+androidMinSdk = "26"
 kotlin = "1.8.10"
 android-library = "8.1.1"
 android-application = "8.1.1"
@@ -18,8 +20,13 @@ junit = "4.13.2"
 junit-ext = "1.1.5"
 espresso = "3.5.1"
 
+#Google
+maps = "18.1.0"
+
 #Plugins
 detekt = "1.23.1"
+maps-platform = "2.0.1"
+secretsGradlePlugin = "2.0.1"
 
 [libraries]
 androidx-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "ktx" }
@@ -28,9 +35,14 @@ material = { group = "com.google.android.material", name = "material", version.r
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 junit-ext = { group = "androidx.test.ext", name = "junit", version.ref = "junit-ext" }
 espresso = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
+maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "maps" }
+secrets-gradle-plugin = { group = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", name = "secrets-gradle-plugin", version.ref = "maps-platform" }
 
 [plugins]
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin"}
 detekt= { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt"}
 android-library= { id = "com.android.library", version.ref = "android-library"}
 android-application= { id = "com.android.application", version.ref = "android-application"}
+maps = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "maps-platform"}
+maps-plugin = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "maps-platform"}
+

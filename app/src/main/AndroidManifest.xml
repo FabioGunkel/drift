@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
-        android:name="com.gunkel.android.affectivecities.DriftApp"
+        android:name="com.gunkel.android.drift.DriftApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -12,6 +12,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.drift"
-        tools:targetApi="34" />
+        tools:targetApi="34" 
+        >
+        <activity android:name="com.gunkel.android.drift.ui.SplashActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http"/>
+                <data android:host="www.drift.com.br"/>
+                <data android:pathPattern="/home"/>
+            </intent-filter>
+        </activity>
+    </application>
 
 </manifest>
