@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "com.gunkel.android.drift"
-    compileSdk = libs.versions.androidSdk.get().toInt()
+    compileSdk = libs.versions.androidCompileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "com.gunkel.android.drift"
-        minSdk = 23
-        targetSdk = 32
+        minSdk = libs.versions.androidMinSdk.get().toInt()
+        targetSdk = libs.versions.androidTargetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
 
@@ -19,8 +19,10 @@ android {
     }
 
     buildTypes {
-        getByName("release") {
+        getByName("debug") {
             isMinifyEnabled = false
+            isDebuggable = true
+//            applicationIdSuffix = "debug"
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -34,6 +36,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":map"))
 
     implementation(libs.androidx.ktx)
     implementation(libs.androidx.compat)

@@ -6,3 +6,9 @@ plugins {
     alias(libs.plugins.detekt)
 
 }
+
+//buildscript {
+//    dependencies {
+//        classpath(libs.secrets.gradle.plugin)
+//    }
+//}
