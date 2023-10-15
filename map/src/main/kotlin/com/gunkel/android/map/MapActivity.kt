@@ -6,6 +6,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import com.google.android.gms.maps.MapsInitializer
+import com.google.android.libraries.places.api.Places
 import com.gunkel.android.map.screen.MapScreen
 
 
@@ -31,6 +33,10 @@ class MapActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        MapsInitializer.initialize(applicationContext)
+        // Initialize the SDK
+        Places.initialize(applicationContext, getString(R.string.mapsKey))
+
         locationPermissionRequest.launch(
             arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,

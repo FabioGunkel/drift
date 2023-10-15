@@ -65,6 +65,7 @@ dependencies {
     implementation(platform(libs.compose.bom))
     implementation(libs.ui.graphics)
     implementation(libs.play.services.location)
+    implementation(libs.places)
     androidTestImplementation(platform(libs.compose.bom))
 
     //Compose
