@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.map"
+    namespace = "com.gunkel.android.map"
     compileSdk = 33
 
     defaultConfig {
@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.lifecycle.runtime.ktx)
     implementation(platform(libs.compose.bom))
     implementation(libs.ui.graphics)
+    implementation(libs.play.services.location)
     androidTestImplementation(platform(libs.compose.bom))
 
     //Compose
@@ -73,10 +74,12 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     // Optional - Integration with activities
-    implementation("androidx.activity:activity-compose:1.6.1")
+    implementation(libs.activity.compose)
     // Optional - Integration with ViewModels
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1")
+    implementation(libs.lifecycle.viewmodel.compose)
     implementation("androidx.compose.material3:material3")
+    implementation(libs.maps.compose)
+    implementation(libs.maps)
 
     //Tests
     testImplementation(libs.junit)

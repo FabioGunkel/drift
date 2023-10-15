@@ -1,25 +1,26 @@
-package com.gunkel.android.drift.ui
+package com.gunkel.android.map
 
 import android.Manifest
-import android.app.Activity
-import android.content.Intent
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import com.gunkel.android.map.screen.MapScreen
 
 
-class SplashActivity : ComponentActivity() {
+class MapActivity : ComponentActivity() {
 
+    @SuppressLint("MissingPermission")
     val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         when {
-            permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-                startMapScreen()
-            }
-
+            permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) ||
             permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                startMapScreen()
+                setContent {
+                    MapScreen()
+                }
             }
 
             else -> {
@@ -30,7 +31,6 @@ class SplashActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         locationPermissionRequest.launch(
             arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
@@ -39,10 +39,4 @@ class SplashActivity : ComponentActivity() {
         )
     }
 
-    private fun startMapScreen() {
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            action = "$packageName.MAP"
-        }
-        startActivity(intent)
-    }
 }
