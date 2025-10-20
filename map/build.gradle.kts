@@ -11,6 +11,7 @@ android {
     namespace = "com.gunkel.android.map"
     compileSdk = libs.versions.androidCompileSdk.get().toInt()
 
+
     defaultConfig {
         minSdk = libs.versions.androidMinSdk.get().toInt()
         targetSdk = libs.versions.androidTargetSdk.get().toInt()

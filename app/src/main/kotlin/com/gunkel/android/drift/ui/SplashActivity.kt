@@ -23,6 +23,7 @@ class SplashActivity : ComponentActivity() {
         val intent = Intent(Intent.ACTION_VIEW).apply {
             action = "$packageName.MAP"
         }
+
         startActivity(intent)
     }
 
