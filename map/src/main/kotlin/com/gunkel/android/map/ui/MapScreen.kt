@@ -1,21 +1,17 @@
-package com.gunkel.android.map.screen
+package com.gunkel.android.map.ui
 
 import android.Manifest.permission.ACCESS_COARSE_LOCATION
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.BitmapFactory
-import android.os.Parcel
+import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,26 +19,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.createBitmap
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.libraries.places.api.Places
-import com.google.android.libraries.places.api.model.LocationBias
-import com.google.android.libraries.places.api.model.LocationRestriction
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.PlaceTypes
 import com.google.android.libraries.places.api.model.RectangularBounds
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
-import com.google.android.libraries.places.api.net.PlacesClient
-import com.google.android.material.search.SearchBar
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
@@ -74,17 +62,23 @@ fun MapScreen() {
     var location = LocationServices.getFusedLocationProviderClient(LocalContext.current)
 
     var markerState = rememberMarkerState(position = currentLocation)
-    location.lastLocation.addOnCompleteListener {
-        currentLocation = LatLng(it.result.latitude, it.result.longitude)
 
-        cameraPositionState.position = CameraPosition.fromLatLngZoom(currentLocation, 15f)
-        markerState.position = currentLocation
+    location.lastLocation.addOnSuccessListener {
+        if(it != null) {
+            currentLocation = LatLng(it.latitude, it.longitude)
+
+            cameraPositionState.position = CameraPosition.fromLatLngZoom(currentLocation, 15f)
+            markerState.position = currentLocation
+        }
+    }
+    location.lastLocation.addOnFailureListener {
+        Log.e("Location error:", it.message + it.stackTraceToString())
     }
     val markersList: ArrayList<Place> by remember {
         mutableStateOf(arrayListOf())
     }
 
-
+    MapContent()
     Box(Modifier.fillMaxSize()) {
         GoogleMap(
             modifier = Modifier.matchParentSize(),
@@ -94,8 +88,11 @@ fun MapScreen() {
         ) {
             markersList.forEach { place ->
                 Marker(
-                    state = MarkerState(place.latLng),
-                    title = place.name
+                    state = MarkerState.invoke(
+                        LatLng(
+                            place.location?.latitude ?: 0.0,
+                            place.location?.latitude ?: 0.0),
+                    )
                 )
             }
             Marker(

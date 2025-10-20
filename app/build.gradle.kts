@@ -3,7 +3,7 @@ import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -31,11 +31,12 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
+
+    kotlin {
+        jvmToolchain(17)
     }
 }
 
@@ -46,6 +47,8 @@ dependencies {
     implementation(libs.androidx.compat)
     implementation(libs.material)
     testImplementation(libs.junit)
+    implementation(platform(libs.compose.bom))
     androidTestImplementation(libs.junit.ext)
     androidTestImplementation(libs.espresso)
+    implementation(libs.androidx.runtime) // Use a recent and compatible version
 }

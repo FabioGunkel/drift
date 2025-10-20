@@ -8,7 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import com.google.android.gms.maps.MapsInitializer
 import com.google.android.libraries.places.api.Places
-import com.gunkel.android.map.screen.MapScreen
+import com.gunkel.android.map.ui.MapScreen
 
 
 class MapActivity : ComponentActivity() {
