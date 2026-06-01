@@ -1,8 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.hilt)
+    id("org.jetbrains.kotlin.plugin.compose")
     alias(libs.plugins.roborazzi)
 }
 
@@ -19,17 +18,24 @@ android {
         compose = true
     }
 
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin {
+        jvmToolchain(17)
     }
 }
 
 dependencies {
     implementation(project(":feature:map:domain"))
+    implementation(project(":feature:map:data"))
     implementation(project(":core:ui"))
     implementation(project(":core:common"))
     
@@ -41,16 +47,26 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.maps.compose)
     implementation(libs.maps)
-    
-    // Hilt
-    implementation(libs.hilt.android)
-    //kapt(libs.hilt.compiler) // Need to check if kapt is available or use KSP
+    implementation(libs.play.services.location)
+    implementation(libs.androidx.startup)
+
+    // Koin
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
     
     // Test
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.testing)
     testImplementation(libs.roborazzi)
     testImplementation(libs.roborazzi.compose)
     testImplementation(libs.roborazzi.junit.rule)
     debugImplementation(libs.androidx.ui.tooling)
+    
+    androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.junit.ext)
+    androidTestImplementation(libs.espresso)
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.test.manifest)
+    androidTestImplementation(libs.mockkAndroid)
 }

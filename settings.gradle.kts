@@ -18,4 +18,15 @@ dependencyResolutionManagement {
 }
 rootProject.name = "drift"
 include(":app")
-include(":map")
+
+// Core modules
+include(":core:network")
+include(":core:ui")
+include(":core:common")
+include(":core:domain")
+include(":core:user")
+
+// Feature: Map
+include(":feature:map:ui")
+include(":feature:map:domain")
+include(":feature:map:data")

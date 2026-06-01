@@ -18,6 +18,9 @@
         android:theme="@style/Theme.drift"
         tools:targetApi="34" 
         >
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
         <activity android:name="com.gunkel.android.drift.ui.SplashActivity"
             android:exported="true">
             <intent-filter>
@@ -25,6 +28,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name="com.gunkel.android.drift.ui.MainActivity"
+            android:exported="false" />
+
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="com.gunkel.android.drift.core.common.di.CoreKoinInitializer"
+                android:value="androidx.startup" />
+        </provider>
     </application>
 
 </manifest>

@@ -20,11 +20,9 @@ class SplashActivity : ComponentActivity() {
     }
 
     private fun startMapScreen() {
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            action = "$packageName.MAP"
-        }
-
+        val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
+        finish()
     }
 
     @RequiresApi(Build.VERSION_CODES.N)

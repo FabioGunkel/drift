@@ -1,98 +1,161 @@
 package com.gunkel.android.drift.feature.map.domain.usecases
 
+import android.util.Log
 import com.gunkel.android.drift.core.common.DataState
-import com.gunkel.android.drift.core.domain.models.Location
+import com.gunkel.android.drift.core.common.Location
 import com.gunkel.android.drift.feature.map.data.models.Place
 import com.gunkel.android.drift.feature.map.data.models.PlaceType
 import com.gunkel.android.drift.feature.map.data.repositories.DriftRepository
+import kotlin.math.log10
 import kotlin.math.sqrt
 
 class CalculateDriftPathUseCase(
     private val repository: DriftRepository
 ) {
-    suspend operator fun invoke(userLocation: Location, radius: Int): DataState<List<Place>> {
-        val placesResult = repository.getNearbyPlaces(userLocation.latitude, userLocation.longitude, radius)
+    suspend operator fun invoke(userLocation: Location): DataState<List<Place>> {
+        Log.d("DriftUseCase", "Starting Drift calculation from: $userLocation")
         
-        if (placesResult !is DataState.Success) return placesResult as DataState<List<Place>>
+        val radius = 1000
         
-        val allPlaces = placesResult.data
-        if (allPlaces.isEmpty()) return DataState.Error("No places found nearby")
+        // 1. Fetch Landmarks (historic, touristic, parks, museums)
+        // Note: Using only Table A types supported by Search Nearby (New)
+        val landmarkTypes = listOf(
+            "tourist_attraction", "museum", "art_gallery", "park", "library", "church", "historical_place", "market"
+        )
+        val landmarksResult = repository.getNearbyPlaces(userLocation.latitude, userLocation.longitude, radius, landmarkTypes)
         
-        // 1. Weighted Greedy Selection
-        val path = mutableListOf<Place>()
-        var currentLoc = userLocation
-        val remainingPlaces = allPlaces.toMutableList()
+        // 2. Fetch Restaurants
+        val restaurantTypes = listOf("restaurant", "cafe", "bar")
+        val restaurantsResult = repository.getNearbyPlaces(userLocation.latitude, userLocation.longitude, radius, restaurantTypes)
         
-        // We want a path of 5-7 stops
-        val pathSize = minOf(7, allPlaces.size)
-        
-        repeat(pathSize) {
-            val nextPlace = selectNextBestPlace(currentLoc, remainingPlaces, path)
-            if (nextPlace != null) {
-                path.add(nextPlace)
-                remainingPlaces.remove(nextPlace)
-                currentLoc = Location(nextPlace.location.latitude, nextPlace.location.longitude)
-            }
+        if (landmarksResult is DataState.Error) {
+            return DataState.Error("Failed to fetch landmarks: ${landmarksResult.message}")
         }
         
-        // 2. 2-Opt Refinement (Uncrossing)
-        val optimizedPath = optimizePath2Opt(path)
+        // Filter out any "RESTAURANT" or "OTHER" from landmarks just in case API returns them
+        val allLandmarks = (landmarksResult as DataState.Success).data
+            .filter { it.type != PlaceType.RESTAURANT && it.type != PlaceType.OTHER && it.type != PlaceType.STORE }
+        
+        // Ensure restaurantsResult only contains actual restaurants/cafes
+        val allRestaurants = if (restaurantsResult is DataState.Success) {
+            restaurantsResult.data.filter { it.type == PlaceType.RESTAURANT }
+        } else emptyList()
+        
+        // 3. Select top 10 landmarks using weighted scoring
+        val top10Landmarks = allLandmarks
+            .sortedByDescending { calculateScore(it, userLocation, radius) }
+            .take(10)
+            
+        // 4. Select top 3 restaurants using weighted scoring
+        val top3Restaurants = allRestaurants
+            .sortedByDescending { calculateScore(it, userLocation, radius) }
+            .take(3)
+            
+        val selectedStops = (top10Landmarks + top3Restaurants).toMutableList()
+        
+        if (selectedStops.isEmpty()) {
+            return DataState.Error("No relevant places found nearby within 2km")
+        }
+        
+        Log.d("DriftUseCase", "Selected ${top10Landmarks.size} landmarks and ${top3Restaurants.size} restaurants")
+        selectedStops.forEach { 
+            val score = calculateScore(it, userLocation, radius)
+            Log.d("DriftUseCase", "Selected: ${it.name} (${it.type}), Score: %.2f, Ratings: ${it.userRatingsTotal}, Rating: ${it.rating}".format(score))
+        }
+
+        // 5. Create an initial path using nearest neighbor to provide a starting point for optimization
+        val initialPath = buildNearestNeighborPath(userLocation, selectedStops)
+        
+        // 6. Optimize the path using 2-Opt
+        val optimizedPath = optimizePath2Opt(userLocation, initialPath)
         
         return DataState.Success(optimizedPath)
     }
 
-    private fun selectNextBestPlace(currentLoc: Location, remaining: List<Place>, currentPath: List<Place>): Place? {
-        return remaining.maxByOrNull { place ->
-            calculateUtility(currentLoc, place, currentPath)
+    private fun buildNearestNeighborPath(start: Location, stops: List<Place>): List<Place> {
+        val path = mutableListOf<Place>()
+        var currentLoc = start
+        val remaining = stops.toMutableList()
+        
+        while (remaining.isNotEmpty()) {
+            val next = remaining.minByOrNull { calculateEuclideanDistance(currentLoc, Location(it.location.latitude, it.location.longitude)) }
+            if (next != null) {
+                path.add(next)
+                remaining.remove(next)
+                currentLoc = Location(next.location.latitude, next.location.longitude)
+            } else {
+                break
+            }
         }
-    }
-
-    private fun calculateUtility(currentLoc: Location, place: Place, currentPath: List<Place>): Double {
-        val distance = calculateEuclideanDistance(currentLoc, Location(place.location.latitude, place.location.longitude))
-        val baseScore = when (place.type) {
-            PlaceType.HISTORIC_SITE -> 100.0
-            PlaceType.PARK -> 80.0
-            PlaceType.MUSEUM -> 60.0
-            PlaceType.OTHER -> 40.0 // Assuming food/restaurants are mapped to OTHER for now
-            else -> 20.0
-        }
-        
-        // Variety/Safety Bonus: If the last 2 stops were NOT parks/utility, boost parks/food
-        val lastTwoTypes = currentPath.takeLast(2).map { it.type }
-        val needsVariety = lastTwoTypes.isNotEmpty() && lastTwoTypes.all { it == PlaceType.HISTORIC_SITE || it == PlaceType.MUSEUM }
-        
-        val varietyBonus = if (needsVariety && (place.type == PlaceType.PARK || place.type == PlaceType.OTHER)) 50.0 else 0.0
-        
-        // Utility = (Score + Bonus) / (1 + Distance)
-        return (baseScore + varietyBonus) / (1.0 + distance * 1000) // distance in KM, scale penalty
+        return path
     }
 
     private fun calculateEuclideanDistance(loc1: Location, loc2: Location): Double {
         val dLat = loc1.latitude - loc2.latitude
         val dLng = loc1.longitude - loc2.longitude
+        // Approximation: 1 degree latitude ~ 111km, 1 degree longitude ~ 111km * cos(lat)
+        // For 2km radius, simple Euclidean on lat/lng is okay for relative ranking if we just want comparison.
+        // However, to be more precise for "distance / radius" normalization, we should use meters.
         return sqrt(dLat * dLat + dLng * dLng)
     }
 
-    private fun optimizePath2Opt(path: List<Place>): List<Place> {
-        if (path.size < 4) return path
+    private fun calculateDistanceInMeters(loc1: Location, loc2: Location): Double {
+        val earthRadius = 6371000.0 // meters
+        val dLat = Math.toRadians(loc2.latitude - loc1.latitude)
+        val dLng = Math.toRadians(loc2.longitude - loc1.longitude)
+        val a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(loc1.latitude)) * Math.cos(Math.toRadians(loc2.latitude)) *
+                Math.sin(dLng / 2) * Math.sin(dLng / 2)
+        val c = 2 * Math.atan2(sqrt(a), sqrt(1 - a))
+        return earthRadius * c
+    }
+
+    private fun calculateScore(place: Place, userLocation: Location, maxRadius: Int): Double {
+        // Normalization:
+        // 1. Popularity: log10(userRatingsTotal + 1) capped at log10(1001) to favor local gems
+        val cappedRatings = minOf(place.userRatingsTotal.toDouble(), 1000.0)
+        val normPopularity = log10(cappedRatings + 1.0) / log10(1001.0)
         
+        // 2. Rating: rating / 5.0
+        val normRating = place.rating / 5.0
+        
+        // 3. Proximity: 1.0 - (distance / maxRadius)
+        val distance = calculateDistanceInMeters(userLocation, Location(place.location.latitude, place.location.longitude))
+        val normProximity = (1.0 - (distance / maxRadius.toDouble())).coerceIn(0.0, 1.0)
+        
+        // Weights: 0.3 Pop, 0.3 Rating, 0.4 Proximity
+        return (0.3 * normPopularity) + (0.3 * normRating) + (0.4 * normProximity)
+    }
+
+    private fun optimizePath2Opt(start: Location, path: List<Place>): List<Place> {
+        if (path.size < 2) return path
+        
+        // We include the start location in distance calculations to ensure the first leg is also optimized
         val mutablePath = path.toMutableList()
         var improved = true
         
         while (improved) {
             improved = false
-            for (i in 0 until mutablePath.size - 1) {
+            for (i in -1 until mutablePath.size - 1) {
                 for (j in i + 2 until mutablePath.size) {
-                    if (j == mutablePath.size - 1) continue // Simplified for non-loop path
+                    val p1 = if (i == -1) start else Location(mutablePath[i].location.latitude, mutablePath[i].location.longitude)
+                    val p2 = Location(mutablePath[i + 1].location.latitude, mutablePath[i + 1].location.longitude)
+                    val p3 = Location(mutablePath[j].location.latitude, mutablePath[j].location.longitude)
+                    val p4 = if (j + 1 == mutablePath.size) null else Location(mutablePath[j + 1].location.latitude, mutablePath[j + 1].location.longitude)
                     
-                    val dist1 = calculateEuclideanDistance(Location(mutablePath[i].location.latitude, mutablePath[i].location.longitude), Location(mutablePath[i+1].location.latitude, mutablePath[i+1].location.longitude)) +
-                                calculateEuclideanDistance(Location(mutablePath[j].location.latitude, mutablePath[j].location.longitude), Location(mutablePath[j+1].location.latitude, mutablePath[j+1].location.longitude))
+                    // Current distance: (p1-p2) + (p3-p4)
+                    var currentDist = calculateEuclideanDistance(p1, p2)
+                    if (p4 != null) {
+                        currentDist += calculateEuclideanDistance(p3, p4)
+                    }
                     
-                    val dist2 = calculateEuclideanDistance(Location(mutablePath[i].location.latitude, mutablePath[i].location.longitude), Location(mutablePath[j].location.latitude, mutablePath[j].location.longitude)) +
-                                calculateEuclideanDistance(Location(mutablePath[i+1].location.latitude, mutablePath[i+1].location.longitude), Location(mutablePath[j+1].location.latitude, mutablePath[j+1].location.longitude))
+                    // New distance if we swap: (p1-p3) + (p2-p4)
+                    var newDist = calculateEuclideanDistance(p1, p3)
+                    if (p4 != null) {
+                        newDist += calculateEuclideanDistance(p2, p4)
+                    }
                     
-                    if (dist2 < dist1) {
-                        // Swap i+1 to j
+                    if (newDist < currentDist) {
                         mutablePath.subList(i + 1, j + 1).reverse()
                         improved = true
                     }

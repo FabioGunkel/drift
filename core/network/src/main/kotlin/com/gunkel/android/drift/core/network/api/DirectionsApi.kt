@@ -1,5 +1,6 @@
 package com.gunkel.android.drift.core.network.api
 
+import com.google.gson.annotations.SerializedName
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -16,11 +17,12 @@ interface DirectionsApi {
 
 data class DirectionsResponse(
     val routes: List<Route>,
-    val status: String
+    val status: String,
+    @SerializedName("error_message") val errorMessage: String? = null
 )
 
 data class Route(
-    val overview_polyline: Polyline
+    @SerializedName("overview_polyline") val overviewPolyline: Polyline
 )
 
 data class Polyline(

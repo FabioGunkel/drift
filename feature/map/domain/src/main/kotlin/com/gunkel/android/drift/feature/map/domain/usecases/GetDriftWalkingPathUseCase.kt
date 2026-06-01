@@ -1,7 +1,7 @@
 package com.gunkel.android.drift.feature.map.domain.usecases
 
 import com.gunkel.android.drift.core.common.DataState
-import com.gunkel.android.drift.core.domain.models.Location
+import com.gunkel.android.drift.core.common.Location
 import com.gunkel.android.drift.feature.map.data.models.DriftPath
 import com.gunkel.android.drift.feature.map.data.repositories.DriftRepository
 
@@ -9,8 +9,8 @@ class GetDriftWalkingPathUseCase(
     private val calculateStopsUseCase: CalculateDriftPathUseCase,
     private val repository: DriftRepository
 ) {
-    suspend operator fun invoke(userLocation: Location, radius: Int): DataState<DriftPath> {
-        val stopsResult = calculateStopsUseCase(userLocation, radius)
+    suspend operator fun invoke(userLocation: Location): DataState<DriftPath> {
+        val stopsResult = calculateStopsUseCase(userLocation)
         if (stopsResult !is DataState.Success) return stopsResult as DataState<DriftPath>
         
         val stops = stopsResult.data
