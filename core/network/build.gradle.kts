@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.maps.plugin)
 }
 
 android {
@@ -16,14 +17,26 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin {
+        jvmToolchain(17)
+    }
+    
+    buildFeatures {
+        buildConfig = true
+    }
+
+    secrets {
+        propertiesFileName = ".secrets/debug.properties"
+        defaultPropertiesFileName = ".secrets/local.properties"
     }
 }
 
 dependencies {
+    implementation(project(":core:common"))
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
+    implementation(libs.koin.android)
+    implementation(libs.androidx.startup)
 }

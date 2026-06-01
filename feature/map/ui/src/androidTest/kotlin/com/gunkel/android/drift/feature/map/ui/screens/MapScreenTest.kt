@@ -3,7 +3,7 @@ package com.gunkel.android.drift.feature.map.ui.screens
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import com.gunkel.android.drift.core.domain.models.Location
+import com.gunkel.android.drift.core.common.Location
 import com.gunkel.android.drift.feature.map.ui.viewmodels.MapViewModel
 import io.mockk.mockk
 import io.mockk.slot

@@ -4,6 +4,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.maps.plugin)
 }
 
 android {
@@ -29,6 +30,16 @@ android {
 
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
+        
+        getByName("release") {
+            isMinifyEnabled = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+    }
+
+    secrets {
+        propertiesFileName = ".secrets/debug.properties"
+        defaultPropertiesFileName = ".secrets/local.properties"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -41,11 +52,21 @@ android {
 }
 
 dependencies {
-    implementation(project(":map"))
+    implementation(project(":feature:map:ui"))
+    implementation(project(":feature:map:domain"))
+    implementation(project(":feature:map:data"))
+    implementation(project(":core:ui"))
 
     implementation(libs.androidx.ktx)
     implementation(libs.androidx.compat)
     implementation(libs.material)
+    implementation(libs.activity.compose)
+    implementation(libs.androidx.startup)
+    implementation("io.insert-koin:koin-androidx-startup:4.2.1")
+    implementation(libs.koin.android)
+
+    testImplementation(libs.junit)
+
     testImplementation(libs.junit)
     implementation(platform(libs.compose.bom))
     androidTestImplementation(libs.junit.ext)

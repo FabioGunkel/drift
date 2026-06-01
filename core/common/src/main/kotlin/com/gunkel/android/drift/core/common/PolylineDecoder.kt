@@ -1,6 +1,6 @@
 package com.gunkel.android.drift.core.common
 
-import com.gunkel.android.drift.core.domain.models.Location
+import com.gunkel.android.drift.core.common.Location
 
 object PolylineDecoder {
     fun decode(encoded: String): List<Location> {
