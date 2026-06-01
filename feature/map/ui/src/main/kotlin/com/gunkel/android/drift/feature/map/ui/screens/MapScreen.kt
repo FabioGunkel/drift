@@ -27,10 +27,10 @@ fun MapScreen(
 
     MapContent(
         uiState = uiState,
-        onDriftClick = {
+        onDriftClick = { radius ->
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
-                    viewModel.onDriftClicked(Location(location.latitude, location.longitude))
+                    viewModel.onDriftClicked(Location(location.latitude, location.longitude), radius)
                 }
             }
         },

@@ -9,8 +9,8 @@ class GetDriftWalkingPathUseCase(
     private val calculateStopsUseCase: CalculateDriftPathUseCase,
     private val repository: DriftRepository
 ) {
-    suspend operator fun invoke(userLocation: Location): DataState<DriftPath> {
-        val stopsResult = calculateStopsUseCase(userLocation)
+    suspend operator fun invoke(userLocation: Location, radius: Int = 1000): DataState<DriftPath> {
+        val stopsResult = calculateStopsUseCase(userLocation, radius)
         if (stopsResult !is DataState.Success) return stopsResult as DataState<DriftPath>
         
         val stops = stopsResult.data
