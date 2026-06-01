@@ -18,10 +18,10 @@ class MapViewModel(
     private val _uiState = MutableStateFlow<DriftUiState>(DriftUiState.Idle)
     val uiState: StateFlow<DriftUiState> = _uiState.asStateFlow()
 
-    fun onDriftClicked(currentLocation: Location) {
+    fun onDriftClicked(currentLocation: Location, radius: Int = 1000) {
         viewModelScope.launch {
             _uiState.value = DriftUiState.Loading
-            val result = getDriftWalkingPathUseCase(currentLocation)
+            val result = getDriftWalkingPathUseCase(currentLocation, radius)
             
             _uiState.value = when (result) {
                 is DataState.Success -> DriftUiState.PathFound(

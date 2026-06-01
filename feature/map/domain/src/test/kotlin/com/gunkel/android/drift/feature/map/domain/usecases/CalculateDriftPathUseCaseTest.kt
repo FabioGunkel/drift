@@ -54,7 +54,7 @@ class CalculateDriftPathUseCaseTest {
         coEvery { repository.getNearbyPlaces(any(), any(), 1000, match { it.contains("restaurant") }) } returns DataState.Success(listOf(restaurant))
 
         // When
-        val result = useCase(userLoc)
+        val result = useCase(userLoc, 1000)
 
         // Then
         assertTrue(result is DataState.Success)
@@ -84,7 +84,7 @@ class CalculateDriftPathUseCaseTest {
 
         coEvery { repository.getNearbyPlaces(any(), any(), any(), any()) } returns DataState.Success(places)
 
-        val result = useCase(userLoc)
+        val result = useCase(userLoc, 1000)
         val path = (result as DataState.Success).data
         
         // Closest should be first due to nearest neighbor + 2-opt
@@ -117,7 +117,7 @@ class CalculateDriftPathUseCaseTest {
 
         coEvery { repository.getNearbyPlaces(any(), any(), any(), any()) } returns DataState.Success(listOf(popularFar, localClose))
 
-        val result = useCase(userLoc)
+        val result = useCase(userLoc, 1000)
         val path = (result as DataState.Success).data
         
         // With the cap at 1000, popularFar's normPopularity is 1.0. 
@@ -133,5 +133,20 @@ class CalculateDriftPathUseCaseTest {
         // Both should be in top 10 if only 2 provided.
         // The path starts at userLoc and goes to nearest neighbor.
         assertEquals("local", path[0].id)
+    }
+
+    @Test
+    fun `invoke should use provided radius in repository calls`() = runTest {
+        val userLoc = Location(0.0, 0.0)
+        val customRadius = 2500
+        
+        coEvery { repository.getNearbyPlaces(any(), any(), customRadius, any()) } returns DataState.Success(emptyList())
+        coEvery { repository.getNearbyPlaces(any(), any(), customRadius, any()) } returns DataState.Success(emptyList())
+
+        useCase(userLoc, customRadius)
+
+        io.mockk.coVerify {
+            repository.getNearbyPlaces(any(), any(), customRadius, any())
+        }
     }
 }

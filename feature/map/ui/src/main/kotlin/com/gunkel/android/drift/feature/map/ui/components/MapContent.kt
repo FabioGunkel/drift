@@ -28,7 +28,7 @@ import com.google.maps.android.compose.*
 @Composable
 fun MapContent(
     uiState: DriftUiState,
-    onDriftClick: () -> Unit,
+    onDriftClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val cameraPositionState = rememberCameraPositionState {
@@ -56,7 +56,23 @@ fun MapContent(
             .semantics { testTagsAsResourceId = true },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = onDriftClick,
+                onClick = {
+                    val projection = cameraPositionState.projection
+                    val radius = if (projection != null) {
+                        val visibleRegion = projection.visibleRegion
+                        val center = cameraPositionState.position.target
+                        val corner = visibleRegion.farLeft
+                        
+                        val results = FloatArray(1)
+                        android.location.Location.distanceBetween(
+                            center.latitude, center.longitude,
+                            corner.latitude, corner.longitude,
+                            results
+                        )
+                        results[0].toInt().coerceIn(500, 5000)
+                    } else 1000
+                    onDriftClick(radius)
+                },
                 modifier = Modifier.testTag("drift_button"),
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = Color.White
