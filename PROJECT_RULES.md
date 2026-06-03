@@ -8,3 +8,4 @@ This project uses a modularized set of rules. Please refer to the specific files
 - [**UI & Compose**](file:///.rules/UI.md): Guidelines for Screens, Content, and Previews.
 - [**Testing**](file:///.rules/TESTING.md): Requirements for Unit, Screenshot, and GMD tests.
 - [**Coding Standards**](file:///.rules/CODING_STANDARDS.md): Language and library standards.
+- [**Kanban Board**](file:///.rules/KANBAN.md): How to access and read the task board.

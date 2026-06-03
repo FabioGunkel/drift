@@ -132,12 +132,13 @@ fun MapContent(
                             else -> BitmapDescriptorFactory.HUE_AZURE
                         }
                         
-                        Marker(
+                        MarkerInfoWindowContent(
                             state = MarkerState(position = LatLng(place.location.latitude, place.location.longitude)),
                             title = "${index + 1}. ${place.name}",
-                            snippet = place.type.name,
                             icon = BitmapDescriptorFactory.defaultMarker(markerColor)
-                        )
+                        ) {
+                            PlaceInfoWindow(place = place)
+                        }
                     }
                 }
             }

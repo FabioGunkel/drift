@@ -49,6 +49,8 @@ dependencies {
     implementation(libs.maps)
     implementation(libs.play.services.location)
     implementation(libs.androidx.startup)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 
     // Koin
     implementation(libs.koin.android)
