@@ -33,6 +33,8 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.startup)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

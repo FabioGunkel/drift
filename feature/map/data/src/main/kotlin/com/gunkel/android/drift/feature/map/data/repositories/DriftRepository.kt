@@ -1,21 +1,36 @@
 package com.gunkel.android.drift.feature.map.data.repositories
 
+import android.content.Context
+import android.graphics.Bitmap
 import android.util.Log
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.CircularBounds
 import com.google.android.libraries.places.api.model.Place.Field
+import com.google.android.libraries.places.api.net.FetchResolvedPhotoUriRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.api.net.SearchNearbyRequest
+import coil3.ImageLoader
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
+import coil3.request.bitmapConfig
+import coil3.toBitmap
 import com.gunkel.android.drift.core.common.DataState
 import com.gunkel.android.drift.core.common.Location
 import com.gunkel.android.drift.core.network.api.DirectionsApi
 import com.gunkel.android.drift.feature.map.data.models.Place
 import com.gunkel.android.drift.feature.map.data.models.PlaceType
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 class DriftRepository(
     private val directionsApi: DirectionsApi,
     private val placesClient: PlacesClient,
+    private val imageLoader: ImageLoader,
+    private val context: Context,
     private val apiKey: String
 ) {
     suspend fun getNearbyPlaces(
@@ -23,8 +38,8 @@ class DriftRepository(
         lng: Double,
         radius: Int,
         includedTypes: List<String>? = null
-    ): DataState<List<Place>> {
-        return try {
+    ): DataState<List<Place>> = withContext(Dispatchers.IO) {
+        try {
             val center = LatLng(lat, lng)
             val circle = CircularBounds.newInstance(center, radius.toDouble())
             
@@ -34,10 +49,11 @@ class DriftRepository(
                 Field.LOCATION,
                 Field.TYPES,
                 Field.USER_RATING_COUNT,
-                Field.RATING
+                Field.RATING,
+                Field.EDITORIAL_SUMMARY,
+                Field.PHOTO_METADATAS
             )
             
-            // If types are provided, use them; otherwise use a default broad set
             val typeFilters = includedTypes ?: listOf(
                 "historical_place", "tourist_attraction", "museum", "art_gallery",
                 "park", "cultural_center", "sculpture", "library"
@@ -45,28 +61,71 @@ class DriftRepository(
             
             val request = SearchNearbyRequest.builder(circle, placeFields)
                 .setIncludedTypes(typeFilters)
-                .setMaxResultCount(20) // API limit is 20 for searchNearby
+                .setMaxResultCount(20)
                 .build()
 
             val response = placesClient.searchNearby(request).await()
-            Log.d("DriftRepository", "Radius $radius m: Found ${response.places.size} raw places for types $typeFilters")
             
-            val places = response.places.map { googlePlace ->
-                Log.d("DriftRepository", "Place: ${googlePlace.displayName}, Types: ${googlePlace.placeTypes}, Ratings: ${googlePlace.userRatingCount}")
-                Place(
-                    id = googlePlace.id ?: "",
-                    name = googlePlace.displayName ?: "Unknown",
-                    location = Location(
-                        googlePlace.location?.latitude ?: 0.0,
-                        googlePlace.location?.longitude ?: 0.0
-                    ),
-                    type = mapGoogleTypeToDrift(googlePlace.placeTypes),
-                    userRatingsTotal = googlePlace.userRatingCount ?: 0,
-                    rating = googlePlace.rating ?: 0.0
-                )
+            val places = coroutineScope {
+                response.places.map { googlePlace ->
+                    async {
+                        val placeName = googlePlace.displayName ?: "Unknown"
+                        val photoMetadata = googlePlace.photoMetadatas?.firstOrNull()
+                        var finalPhoto: Bitmap? = null
+                        
+                        if (photoMetadata != null) {
+                            try {
+                                val uriRequest = FetchResolvedPhotoUriRequest.builder(photoMetadata)
+                                    .setMaxWidth(800)
+                                    .setMaxHeight(800)
+                                    .build()
+                                val uriResponse = placesClient.fetchResolvedPhotoUri(uriRequest).await()
+                                val uri = uriResponse.uri
+                                
+                                if (uri != null) {
+                                    val coilRequest = ImageRequest.Builder(context)
+                                        .data(uri.toString())
+                                        .allowHardware(false)
+                                        .bitmapConfig(Bitmap.Config.ARGB_8888)
+                                        .size(400, 400)
+                                        .build()
+                                    
+                                    val result = imageLoader.execute(coilRequest)
+                                    val bitmap = result.image?.toBitmap()
+                                    
+                                    if (bitmap != null) {
+                                        // Google Maps InfoWindows use Software Rendering and don't support Hardware Bitmaps.
+                                        finalPhoto = if (bitmap.config == Bitmap.Config.HARDWARE) {
+                                            bitmap.copy(Bitmap.Config.ARGB_8888, false)
+                                        } else {
+                                            bitmap
+                                        }
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                Log.w("DriftRepository", "[$placeName] Photo failed: ${e.message}")
+                            }
+                        }
+
+                        Place(
+                            id = googlePlace.id ?: "",
+                            name = placeName,
+                            location = Location(
+                                googlePlace.location?.latitude ?: 0.0,
+                                googlePlace.location?.longitude ?: 0.0
+                            ),
+                            description = googlePlace.editorialSummary,
+                            type = mapGoogleTypeToDrift(googlePlace.placeTypes),
+                            photo = finalPhoto,
+                            userRatingsTotal = googlePlace.userRatingCount ?: 0,
+                            rating = googlePlace.rating ?: 0.0
+                        )
+                    }
+                }.awaitAll()
             }
             DataState.Success(places)
         } catch (e: Exception) {
+            Log.e("DriftRepository", "getNearbyPlaces Error: ${e.message}", e)
             DataState.Error("Failed to fetch nearby places: ${e.message}", e)
         }
     }

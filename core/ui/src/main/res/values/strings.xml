@@ -1,0 +1,10 @@
+<resources>
+    <!-- Place Types -->
+    <string name="place_type_museum">Museum</string>
+    <string name="place_type_park">Park</string>
+    <string name="place_type_tourist_attraction">Tourist Attraction</string>
+    <string name="place_type_historic_site">Historic Site</string>
+    <string name="place_type_restaurant">Restaurant</string>
+    <string name="place_type_store">Store</string>
+    <string name="place_type_other">Place of interest</string>
+</resources>
