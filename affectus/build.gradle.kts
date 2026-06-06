@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.gunkel.android.drift.core.ui"
+    namespace = "com.gunkel.android.affectus"
     compileSdk = libs.versions.androidCompileSdk.get().toInt()
 
     defaultConfig {
@@ -27,7 +27,6 @@ android {
 }
 
 dependencies {
-    api(project(":affectus"))
     api(platform(libs.compose.bom))
     api(libs.androidx.ui)
     api(libs.androidx.ui.graphics)

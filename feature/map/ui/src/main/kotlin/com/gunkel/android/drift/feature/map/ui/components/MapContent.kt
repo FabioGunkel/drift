@@ -11,11 +11,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gunkel.android.drift.core.common.PolylineDecoder
+import com.gunkel.android.drift.core.ui.R as CoreR
 import com.gunkel.android.drift.feature.map.data.models.Place
 import com.gunkel.android.drift.feature.map.ui.viewmodels.DriftUiState
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -84,7 +86,7 @@ fun MapContent(
                         strokeWidth = 2.dp
                     )
                 }
-                Text(text = "Drift")
+                Text(text = stringResource(id = CoreR.string.drift_button_label))
             }
         },
         floatingActionButtonPosition = FabPosition.Center
