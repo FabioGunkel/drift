@@ -32,4 +32,5 @@ dependencies {
     api(libs.androidx.ui.graphics)
     api(libs.androidx.ui.tooling.preview)
     api(libs.material3)
+    api(libs.maps)
 }

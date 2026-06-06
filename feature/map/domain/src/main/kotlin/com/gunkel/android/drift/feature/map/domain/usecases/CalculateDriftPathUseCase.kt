@@ -12,7 +12,7 @@ import kotlin.math.sqrt
 class CalculateDriftPathUseCase(
     private val repository: DriftRepository
 ) {
-    suspend operator fun invoke(userLocation: Location, radius: Int = 1000): DataState<List<Place>> {
+    suspend operator fun invoke(userLocation: Location, radius: Int = 0): DataState<List<Place>> {
         Log.d("DriftUseCase", "Starting Drift calculation from: $userLocation with radius: $radius")
         
         // 1. Fetch Landmarks (historic, touristic, parks, museums)

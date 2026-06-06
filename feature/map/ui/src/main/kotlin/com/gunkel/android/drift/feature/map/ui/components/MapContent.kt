@@ -29,6 +29,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.*
 import com.gunkel.android.affectus.theme.AffectusTheme
+import com.gunkel.android.affectus.theme.MarkerUtils
 
 @Composable
 fun MapContent(
@@ -79,7 +80,7 @@ fun MapContent(
                             corner.latitude, corner.longitude,
                             results
                         )
-                        results[0].toInt().coerceIn(500, 5000)
+                        results[0].toInt().coerceIn(1, 5000)
                     } else 1000
                     onDriftClick(radius)
                 },
@@ -138,17 +139,21 @@ fun MapContent(
                         width = 25f
                     )
                     
+                    val startMarker = MarkerUtils.createMarker(AffectusTheme.colors.tertiary, isKeyPoint = true)
+                    val endMarker = MarkerUtils.createMarker(AffectusTheme.colors.primary, isKeyPoint = true)
+                    val midMarker = MarkerUtils.createMarker(AffectusTheme.colors.secondary, isKeyPoint = false)
+
                     uiState.stops.forEachIndexed { index, place ->
-                        val markerColor = when (index) {
-                            0 -> BitmapDescriptorFactory.HUE_GREEN // Start
-                            uiState.stops.size - 1 -> BitmapDescriptorFactory.HUE_RED // End
-                            else -> BitmapDescriptorFactory.HUE_AZURE
+                        val markerIcon = when (index) {
+                            0 -> startMarker
+                            uiState.stops.size - 1 -> endMarker
+                            else -> midMarker
                         }
                         
-                        MarkerInfoWindowContent(
+                        MarkerInfoWindow(
                             state = MarkerState(position = LatLng(place.location.latitude, place.location.longitude)),
                             title = "${index + 1}. ${place.name}",
-                            icon = BitmapDescriptorFactory.defaultMarker(markerColor)
+                            icon = markerIcon
                         ) {
                             PlaceInfoWindow(place = place)
                         }
