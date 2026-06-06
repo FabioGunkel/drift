@@ -6,20 +6,20 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 
 object AffectusTheme {
-    val colors: AffectusColors
+    val colors: Colors
         @Composable
         @ReadOnlyComposable
-        get() = LocalAffectusColors.current
+        get() = LocalColors.current
 
-    val dimens: AffectusDimens
+    val dimens: Dimens
         @Composable
         @ReadOnlyComposable
-        get() = LocalAffectusDimens.current
+        get() = LocalDimens.current
 
-    val typography: AffectusTypography
+    val typography: Typography
         @Composable
         @ReadOnlyComposable
-        get() = LocalAffectusTypography.current
+        get() = LocalTypography.current
 }
 
 @Composable
@@ -27,12 +27,12 @@ fun AffectusTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) LightAffectusColors else LightAffectusColors
+    val colorScheme = if (darkTheme) LightColors else LightColors
     
     CompositionLocalProvider(
-        LocalAffectusColors provides colorScheme,
-        LocalAffectusDimens provides AffectusDimens(),
-        LocalAffectusTypography provides AffectusTypography()
+        LocalColors provides colorScheme,
+        LocalDimens provides Dimens(),
+        LocalTypography provides Typography()
     ) {
         content()
     }

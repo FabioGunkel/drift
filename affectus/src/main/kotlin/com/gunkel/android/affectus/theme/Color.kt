@@ -10,7 +10,7 @@ val SafetyGreen = Color(0xFF2E7D32)
 val PaperWhite = Color(0xFFF5F5F5)
 
 @Immutable
-data class AffectusColors(
+data class Colors(
     val primary: Color,
     val secondary: Color,
     val tertiary: Color,
@@ -24,7 +24,7 @@ data class AffectusColors(
     val onError: Color
 )
 
-val LightAffectusColors = AffectusColors(
+val LightColors = Colors(
     primary = DriftTeal,
     secondary = HistoryAmber,
     tertiary = SafetyGreen,
@@ -38,4 +38,4 @@ val LightAffectusColors = AffectusColors(
     onError = Color.White
 )
 
-val LocalAffectusColors = staticCompositionLocalOf { LightAffectusColors }
+val LocalColors = staticCompositionLocalOf { LightColors }

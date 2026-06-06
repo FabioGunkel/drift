@@ -6,7 +6,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Immutable
-data class AffectusDimens(
+data class Dimens(
     val extraSmall: Dp = 4.dp,
     val small: Dp = 8.dp,
     val medium: Dp = 16.dp,
@@ -17,4 +17,4 @@ data class AffectusDimens(
     val iconLarge: Dp = 48.dp
 )
 
-val LocalAffectusDimens = staticCompositionLocalOf { AffectusDimens() }
+val LocalDimens = staticCompositionLocalOf { Dimens() }

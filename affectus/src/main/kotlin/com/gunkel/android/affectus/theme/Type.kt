@@ -8,7 +8,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 @Immutable
-data class AffectusTypography(
+data class Typography(
     val titleLarge: TextStyle = TextStyle(
         fontFamily = FontFamily.Serif,
         fontWeight = FontWeight.Bold,
@@ -41,4 +41,4 @@ data class AffectusTypography(
     )
 )
 
-val LocalAffectusTypography = staticCompositionLocalOf { AffectusTypography() }
+val LocalTypography = staticCompositionLocalOf { Typography() }
