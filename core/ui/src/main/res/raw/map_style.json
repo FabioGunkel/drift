@@ -53,7 +53,19 @@
     "elementType": "geometry",
     "stylers": [
       {
-        "color": "#e5e5e5"
+        "visibility": "on"
+      },
+      {
+        "color": "#B4C4B4"
+      }
+    ]
+  },
+  {
+    "featureType": "poi.park",
+    "elementType": "labels.text",
+    "stylers": [
+      {
+        "visibility": "on"
       }
     ]
   },
@@ -125,7 +137,10 @@
     "elementType": "geometry",
     "stylers": [
       {
-        "color": "#c9c9c9"
+        "visibility": "on"
+      },
+      {
+        "color": "#A2B5BF"
       }
     ]
   },
