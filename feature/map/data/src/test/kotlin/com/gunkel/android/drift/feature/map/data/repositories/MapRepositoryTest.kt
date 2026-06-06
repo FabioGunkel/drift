@@ -1,5 +1,7 @@
 package com.gunkel.android.drift.feature.map.data.repositories
 
+import android.content.Context
+import coil3.ImageLoader
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.gunkel.android.drift.core.common.DataState
 import com.gunkel.android.drift.core.network.api.DirectionsApi
@@ -13,7 +15,9 @@ class MapRepositoryTest {
 
     private val directionsApi: DirectionsApi = mockk()
     private val placesClient: PlacesClient = mockk()
-    private val repository = DriftRepository(directionsApi, placesClient, "key")
+    private val imageLoader: ImageLoader = mockk()
+    private val context: Context = mockk()
+    private val repository = DriftRepository(directionsApi, placesClient, imageLoader, context, "key")
 
     @Test
     fun `getNearbyPlaces should return Success with mock data`() = runTest {
