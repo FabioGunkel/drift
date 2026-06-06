@@ -51,7 +51,8 @@ class DriftRepository(
                 Field.USER_RATING_COUNT,
                 Field.RATING,
                 Field.EDITORIAL_SUMMARY,
-                Field.PHOTO_METADATAS
+                Field.PHOTO_METADATAS,
+                Field.FORMATTED_ADDRESS
             )
             
             val typeFilters = includedTypes ?: listOf(
@@ -119,7 +120,14 @@ class DriftRepository(
                             photo = finalPhoto,
                             userRatingsTotal = googlePlace.userRatingCount ?: 0,
                             rating = googlePlace.rating ?: 0.0
-                        )
+                        ).let { place ->
+                            // Backup: If editorial summary is missing, use formatted address as description
+                            if (place.description.isNullOrBlank()) {
+                                place.copy(description = googlePlace.formattedAddress)
+                            } else {
+                                place
+                            }
+                        }
                     }
                 }.awaitAll()
             }
