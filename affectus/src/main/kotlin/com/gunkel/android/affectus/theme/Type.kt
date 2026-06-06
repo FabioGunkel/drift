@@ -13,31 +13,31 @@ data class Typography(
         fontFamily = FontFamily.Serif,
         fontWeight = FontWeight.Bold,
         fontSize = 48.sp,
-        letterSpacing = 8.sp
+        letterSpacing = 2.sp
     ),
     val titleMedium: TextStyle = TextStyle(
         fontFamily = FontFamily.Serif,
         fontWeight = FontWeight.SemiBold,
         fontSize = 24.sp,
-        letterSpacing = 2.sp
+        letterSpacing = 1.sp
     ),
     val bodyLarge: TextStyle = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = FontFamily.Serif,
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
+        fontSize = 18.sp,
         letterSpacing = 0.5.sp
     ),
     val bodyMedium: TextStyle = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
-        letterSpacing = 2.sp
+        letterSpacing = 0.25.sp
     ),
     val labelSmall: TextStyle = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = FontFamily.Monospace,
         fontWeight = FontWeight.Medium,
         fontSize = 11.sp,
-        letterSpacing = 0.5.sp
+        letterSpacing = 1.sp
     )
 )
 

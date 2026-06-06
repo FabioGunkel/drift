@@ -4,10 +4,12 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
-val DriftTeal = Color(0xFF004D40)
-val HistoryAmber = Color(0xFFFFC107)
-val SafetyGreen = Color(0xFF2E7D32)
-val PaperWhite = Color(0xFFF5F5F5)
+// The Encounter Palette (Psychogeographic)
+val EncounterGold = Color(0xFFD4AF37)      // Antique Gold (Discovery)
+val AtmosphereMidnight = Color(0xFF2C3E50) // Midnight Blue (Depth)
+val TensionCrimson = Color(0xFFE74C3C)     // Alizarin Crimson (Emotion)
+val TheVoidWhite = Color(0xFFECF0F1)       // Off-white (Canvas)
+val DeepCarbon = Color(0xFF1A1A1A)         // Text/Contrast
 
 @Immutable
 data class Colors(
@@ -25,16 +27,16 @@ data class Colors(
 )
 
 val LightColors = Colors(
-    primary = DriftTeal,
-    secondary = HistoryAmber,
-    tertiary = SafetyGreen,
-    background = PaperWhite,
+    primary = EncounterGold,
+    secondary = AtmosphereMidnight,
+    tertiary = TensionCrimson,
+    background = TheVoidWhite,
     surface = Color.White,
-    error = Color(0xFFB00020),
-    onPrimary = Color.White,
-    onSecondary = Color.Black,
-    onBackground = Color.Black,
-    onSurface = Color.Black,
+    error = TensionCrimson,
+    onPrimary = DeepCarbon,
+    onSecondary = Color.White,
+    onBackground = DeepCarbon,
+    onSurface = DeepCarbon,
     onError = Color.White
 )
 

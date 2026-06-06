@@ -10,12 +10,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.gunkel.android.drift.core.common.PolylineDecoder
 import com.gunkel.android.drift.core.ui.R as CoreR
 import com.gunkel.android.drift.feature.map.data.models.Place
@@ -34,8 +36,13 @@ fun MapContent(
     onDriftClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(-23.5616, -46.6866), 15f)
+    }
+    
+    val mapStyleOptions = remember(context) {
+        MapStyleOptions.loadRawResourceStyle(context, CoreR.raw.map_style)
     }
 
     // Auto-zoom to path when found
@@ -104,7 +111,10 @@ fun MapContent(
                     zoomControlsEnabled = false,
                     myLocationButtonEnabled = true
                 ),
-                properties = MapProperties(isMyLocationEnabled = true)
+                properties = MapProperties(
+                    isMyLocationEnabled = true,
+                    mapStyleOptions = mapStyleOptions
+                )
             ) {
                 if (uiState is DriftUiState.PathFound) {
                     val decodedPoints = remember(uiState.polylinePoints) {
