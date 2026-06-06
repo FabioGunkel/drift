@@ -26,6 +26,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.*
+import com.gunkel.android.affectus.theme.AffectusTheme
 
 @Composable
 fun MapContent(
@@ -76,8 +77,8 @@ fun MapContent(
                     onDriftClick(radius)
                 },
                 modifier = Modifier.testTag("drift_button"),
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = Color.White
+                containerColor = AffectusTheme.colors.primary,
+                contentColor = AffectusTheme.colors.onPrimary
             ) {
                 if (uiState is DriftUiState.Loading) {
                     CircularProgressIndicator(
@@ -115,7 +116,7 @@ fun MapContent(
                     // Main Path Polyline
                     Polyline(
                         points = decodedPoints,
-                        color = Color(0xFF004D40), // Drift Teal
+                        color = AffectusTheme.colors.primary,
                         width = 15f,
                         geodesic = true
                     )
@@ -123,7 +124,7 @@ fun MapContent(
                     // Path Glow/Border
                     Polyline(
                         points = decodedPoints,
-                        color = Color(0xFF004D40).copy(alpha = 0.3f),
+                        color = AffectusTheme.colors.primary.copy(alpha = 0.3f),
                         width = 25f
                     )
                     
