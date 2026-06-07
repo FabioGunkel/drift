@@ -16,10 +16,10 @@ data class Typography(
         letterSpacing = 2.sp
     ),
     val titleMedium: TextStyle = TextStyle(
-        fontFamily = FontFamily.Serif,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 24.sp,
-        letterSpacing = 1.sp
+        fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.Bold,
+        fontSize = 18.sp,
+        letterSpacing = 0.5.sp
     ),
     val bodyLarge: TextStyle = TextStyle(
         fontFamily = FontFamily.Serif,
