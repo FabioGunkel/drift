@@ -109,49 +109,49 @@ fun DriftButton(
                 withTransform({
                     translate(left = diagOsc, top = vertOsc)
                 }) {
+                    // Zig-zag base path
                     val path = Path().apply {
                         moveTo(0f, centerY)
-                        
-                        // Psychogeographic path curves
-                        val p1y = centerY + (morphFactor * 12f - 6f)
-                        val p2y = centerY - (morphFactor * 18f - 9f)
-
-                        cubicTo(
-                            width * 0.3f, p1y,
-                            width * 0.6f, p2y,
-                            width, centerY
-                        )
+                        val segments = 4
+                        for (i in 1..segments) {
+                            val x = (width / segments) * i
+                            // Alternating offsets to create zig-zag
+                            val yOffset = if (i % 2 == 0) (morphFactor * 8f) else -(morphFactor * 8f)
+                            lineTo(x, centerY + yOffset)
+                        }
                     }
 
                     // Footsteps: Two parallel lines with offset dashes
-                    // Left Foot
-                    drawPath(
-                        path = path,
-                        color = pathColor,
-                        style = Stroke(
-                            width = 3.dp.toPx(),
-                            cap = StrokeCap.Round,
-                            pathEffect = PathEffect.dashPathEffect(
-                                intervals = floatArrayOf(8f, 32f),
-                                phase = footstepPhase
-                            )
-                        )
-                    )
+                    val footSep = 3.dp.toPx()
+                    val dashIntervals = floatArrayOf(6f, 34f) // Shorter "feet", longer gap
 
-                    // Right Foot (Offset path and phase)
-                    val footOffset = 4.dp.toPx()
-                    withTransform({
-                        translate(top = footOffset)
-                    }) {
+                    // Left Foot (offset above the path line)
+                    withTransform({ translate(top = -footSep) }) {
                         drawPath(
                             path = path,
                             color = pathColor,
                             style = Stroke(
-                                width = 3.dp.toPx(),
+                                width = 4.dp.toPx(), // Wider for "boot" look
                                 cap = StrokeCap.Round,
                                 pathEffect = PathEffect.dashPathEffect(
-                                    intervals = floatArrayOf(8f, 32f),
-                                    phase = footstepPhase + 20f
+                                    intervals = dashIntervals,
+                                    phase = footstepPhase
+                                )
+                            )
+                        )
+                    }
+
+                    // Right Foot (offset below the path line)
+                    withTransform({ translate(top = footSep) }) {
+                        drawPath(
+                            path = path,
+                            color = pathColor,
+                            style = Stroke(
+                                width = 4.dp.toPx(),
+                                cap = StrokeCap.Round,
+                                pathEffect = PathEffect.dashPathEffect(
+                                    intervals = dashIntervals,
+                                    phase = footstepPhase + 20f // Out of phase
                                 )
                             )
                         )
