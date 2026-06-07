@@ -66,7 +66,8 @@ fun MapContent(
             .fillMaxSize()
             .semantics { testTagsAsResourceId = true },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
+            DriftButton(
+                isLoading = uiState is DriftUiState.Loading,
                 onClick = {
                     val projection = cameraPositionState.projection
                     val radius = if (projection != null) {
@@ -84,19 +85,8 @@ fun MapContent(
                     } else 1000
                     onDriftClick(radius)
                 },
-                modifier = Modifier.testTag("drift_button"),
-                containerColor = AffectusTheme.colors.primary,
-                contentColor = AffectusTheme.colors.onPrimary
-            ) {
-                if (uiState is DriftUiState.Loading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.padding(end = 8.dp),
-                        color = Color.White,
-                        strokeWidth = 2.dp
-                    )
-                }
-                Text(text = stringResource(id = CoreR.string.drift_button_label))
-            }
+                modifier = Modifier.testTag("drift_button")
+            )
         },
         floatingActionButtonPosition = FabPosition.Center
     ) { paddingValues ->
