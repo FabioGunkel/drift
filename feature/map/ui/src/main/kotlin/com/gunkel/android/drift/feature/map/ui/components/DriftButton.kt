@@ -7,7 +7,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.gunkel.android.affectus.theme.AffectusTheme
@@ -40,7 +40,7 @@ fun DriftButton(
         label = "pathAlpha"
     )
 
-    // Infinite animation for path morphing
+    // Infinite animation for path morphing and oscillation
     val infiniteTransition = rememberInfiniteTransition(label = "pathDrift")
     val morphFactor by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -52,28 +52,28 @@ fun DriftButton(
         label = "morphFactor"
     )
 
-    // Dash animation for drawing effect
-    val dashPhase by infiniteTransition.animateFloat(
+    // Dash animation for "walking" footsteps effect
+    val footstepPhase by infiniteTransition.animateFloat(
         initialValue = 0f,
-        targetValue = 20f,
+        targetValue = 40f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = LinearEasing),
+            animation = tween(1200, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
-        label = "dashPhase"
+        label = "footstepPhase"
     )
 
     Box(
         modifier = modifier
-            .widthIn(min = 140.dp) // Smaller button
-            .height(48.dp)
+            .width(110.dp) // Even smaller button
+            .height(44.dp) // Compact height
             // Outer Gold Stroke
-            .border(2.dp, AffectusTheme.colors.primary, RoundedCornerShape(24.dp))
+            .border(2.dp, AffectusTheme.colors.primary, RoundedCornerShape(22.dp))
             .padding(2.dp)
             // Inner Off-white Stroke
-            .border(1.5.dp, AffectusTheme.colors.background, RoundedCornerShape(22.dp))
+            .border(1.5.dp, AffectusTheme.colors.background, RoundedCornerShape(20.dp))
             .padding(1.5.dp)
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(18.dp))
             .background(AffectusTheme.colors.primary)
             .clickable(enabled = !isLoading) { onClick() },
         contentAlignment = Alignment.Center
@@ -89,48 +89,74 @@ fun DriftButton(
             }
         )
 
-        // Path Animation Layer (Dashed "Drift" path)
+        // Path Animation Layer (Footsteps)
         if (pathAlpha > 0.01f) {
             val pathColor = AffectusTheme.colors.background
             Canvas(
                 modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .height(24.dp)
+                    .fillMaxWidth(0.7f) // Matches approximate text length
+                    .height(20.dp)
                     .graphicsLayer { alpha = pathAlpha }
             ) {
                 val width = size.width
                 val height = size.height
                 val centerY = height / 2f
 
-                val path = Path().apply {
-                    moveTo(0f, centerY)
-                    
-                    // Psychogeographic path curves (inspired by references)
-                    val p1y = centerY + (morphFactor * 12f - 6f)
-                    val p2y = centerY - (morphFactor * 18f - 9f)
-                    val p3y = centerY + (morphFactor * 8f - 4f)
+                // Diagonal and Vertical Oscillation factor
+                val diagOsc = (morphFactor * 10f - 5f)
+                val vertOsc = (morphFactor * 14f - 7f)
 
-                    cubicTo(
-                        width * 0.2f, p1y,
-                        width * 0.5f, p2y,
-                        width * 0.7f, p3y
-                    )
-                    lineTo(width, centerY)
-                }
+                withTransform({
+                    translate(left = diagOsc, top = vertOsc)
+                }) {
+                    val path = Path().apply {
+                        moveTo(0f, centerY)
+                        
+                        // Psychogeographic path curves
+                        val p1y = centerY + (morphFactor * 12f - 6f)
+                        val p2y = centerY - (morphFactor * 18f - 9f)
 
-                drawPath(
-                    path = path,
-                    color = pathColor,
-                    style = Stroke(
-                        width = 2.dp.toPx(),
-                        cap = StrokeCap.Round,
-                        join = StrokeJoin.Round,
-                        pathEffect = PathEffect.dashPathEffect(
-                            intervals = floatArrayOf(10f, 10f),
-                            phase = dashPhase
+                        cubicTo(
+                            width * 0.3f, p1y,
+                            width * 0.6f, p2y,
+                            width, centerY
+                        )
+                    }
+
+                    // Footsteps: Two parallel lines with offset dashes
+                    // Left Foot
+                    drawPath(
+                        path = path,
+                        color = pathColor,
+                        style = Stroke(
+                            width = 3.dp.toPx(),
+                            cap = StrokeCap.Round,
+                            pathEffect = PathEffect.dashPathEffect(
+                                intervals = floatArrayOf(8f, 32f),
+                                phase = footstepPhase
+                            )
                         )
                     )
-                )
+
+                    // Right Foot (Offset path and phase)
+                    val footOffset = 4.dp.toPx()
+                    withTransform({
+                        translate(top = footOffset)
+                    }) {
+                        drawPath(
+                            path = path,
+                            color = pathColor,
+                            style = Stroke(
+                                width = 3.dp.toPx(),
+                                cap = StrokeCap.Round,
+                                pathEffect = PathEffect.dashPathEffect(
+                                    intervals = floatArrayOf(8f, 32f),
+                                    phase = footstepPhase + 20f
+                                )
+                            )
+                        )
+                    }
+                }
             }
         }
     }
