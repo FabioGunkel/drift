@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import androidx.core.graphics.createBitmap
 
 object MarkerUtils {
     /**
@@ -14,7 +15,7 @@ object MarkerUtils {
      */
     fun createMarker(color: Color, isKeyPoint: Boolean = false): BitmapDescriptor {
         val size = if (isKeyPoint) 110 else 80
-        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(size, size)
         val canvas = Canvas(bitmap)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 

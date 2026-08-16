@@ -54,15 +54,23 @@ fun DriftButton(
 
     Box(
         modifier = modifier
-            .width(110.dp) // Even smaller button
-            .height(44.dp) // Compact height
+            .width(110.dp) // Keep fixed width for stability
+            .height(AffectusTheme.dimens.buttonHeightMedium)
             // Outer Gold Stroke
-            .border(2.dp, AffectusTheme.colors.primary, RoundedCornerShape(22.dp))
-            .padding(2.dp)
+            .border(
+                AffectusTheme.dimens.borderThick, 
+                AffectusTheme.colors.primary, 
+                RoundedCornerShape(AffectusTheme.dimens.radiusXL)
+            )
+            .padding(AffectusTheme.dimens.borderThick)
             // Inner Off-white Stroke
-            .border(1.5.dp, AffectusTheme.colors.background, RoundedCornerShape(20.dp))
-            .padding(1.5.dp)
-            .clip(RoundedCornerShape(18.dp))
+            .border(
+                AffectusTheme.dimens.borderMedium, 
+                AffectusTheme.colors.background, 
+                RoundedCornerShape(AffectusTheme.dimens.radiusXL - AffectusTheme.dimens.borderThick)
+            )
+            .padding(AffectusTheme.dimens.borderMedium)
+            .clip(RoundedCornerShape(AffectusTheme.dimens.radiusL))
             .background(AffectusTheme.colors.primary)
             .clickable(enabled = !isLoading) { onClick() },
         contentAlignment = Alignment.Center
@@ -84,7 +92,7 @@ fun DriftButton(
             Canvas(
                 modifier = Modifier
                     .fillMaxWidth(0.7f) // Matches approximate text length
-                    .height(20.dp)
+                    .height(AffectusTheme.dimens.iconS)
                     .graphicsLayer { alpha = pathAlpha }
             ) {
                 val width = size.width

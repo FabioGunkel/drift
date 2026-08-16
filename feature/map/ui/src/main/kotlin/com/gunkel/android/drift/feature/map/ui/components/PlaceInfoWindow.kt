@@ -47,10 +47,10 @@ fun PlaceInfoWindow(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, borderColor, RoundedCornerShape(24.dp))
-                .clip(RoundedCornerShape(24.dp))
+                .border(AffectusTheme.dimens.borderThin, borderColor, RoundedCornerShape(AffectusTheme.dimens.radiusXL))
+                .clip(RoundedCornerShape(AffectusTheme.dimens.radiusXL))
                 .background(backgroundColor)
-                .padding(16.dp),
+                .padding(AffectusTheme.dimens.spacingM),
             horizontalAlignment = Alignment.Start
         ) {
             Text(
@@ -64,7 +64,7 @@ fun PlaceInfoWindow(
                 text = stringResource(id = mapPlaceTypeToStringRes(place.type)),
                 style = AffectusTheme.typography.labelSmall,
                 color = AffectusTheme.colors.secondary.copy(alpha = 0.6f),
-                modifier = Modifier.padding(bottom = 12.dp)
+                modifier = Modifier.padding(bottom = AffectusTheme.dimens.spacingM)
             )
 
             if (place.photo != null) {
@@ -72,7 +72,7 @@ fun PlaceInfoWindow(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(AffectusTheme.dimens.radiusM))
                         .background(AffectusTheme.colors.secondary.copy(alpha = 0.1f))
                 ) {
                     val data = place.photo
@@ -107,7 +107,7 @@ fun PlaceInfoWindow(
                     text = description,
                     style = AffectusTheme.typography.bodyMedium,
                     color = AffectusTheme.colors.onBackground.copy(alpha = 0.8f),
-                    modifier = Modifier.padding(top = 12.dp),
+                    modifier = Modifier.padding(top = AffectusTheme.dimens.spacingM),
                     lineHeight = 20.sp
                 )
             }
@@ -116,7 +116,7 @@ fun PlaceInfoWindow(
         // The "V" anchor
         Canvas(
             modifier = Modifier
-                .size(24.dp, 12.dp)
+                .size(AffectusTheme.dimens.radiusXL, AffectusTheme.dimens.radiusM)
                 .offset(y = (-1).dp) // Overlap to make it seamless
         ) {
             val path = Path().apply {

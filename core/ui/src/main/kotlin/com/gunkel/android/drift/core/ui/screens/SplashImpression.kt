@@ -29,7 +29,7 @@ fun SplashImpression(
                 color = AffectusTheme.colors.secondary,
                 style = AffectusTheme.typography.titleLarge
             )
-            Spacer(modifier = Modifier.height(AffectusTheme.dimens.medium))
+            Spacer(modifier = Modifier.height(AffectusTheme.dimens.spacingM))
             Text(
                 text = stringResource(id = R.string.app_slogan),
                 color = AffectusTheme.colors.onPrimary.copy(alpha = 0.7f),
