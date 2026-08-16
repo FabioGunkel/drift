@@ -18,6 +18,7 @@ dependencyResolutionManagement {
 }
 rootProject.name = "drift"
 include(":app")
+include(":affectus")
 
 // Core modules
 include(":core:network")

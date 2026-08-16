@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.gunkel.android.drift.core.ui"
+    namespace = "com.gunkel.android.affectus"
     compileSdk = libs.versions.androidCompileSdk.get().toInt()
 
     defaultConfig {
@@ -27,15 +27,10 @@ android {
 }
 
 dependencies {
-    api(project(":affectus"))
-    api(project(":core:common"))
-    api(project(":feature:map:data"))
-    
     api(platform(libs.compose.bom))
     api(libs.androidx.ui)
     api(libs.androidx.ui.graphics)
     api(libs.androidx.ui.tooling.preview)
     api(libs.material3)
-    api(libs.coil.compose)
-    api(libs.coil.network.okhttp)
+    api(libs.maps)
 }

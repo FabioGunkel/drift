@@ -5,20 +5,16 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.rememberAsyncImagePainter
@@ -26,36 +22,29 @@ import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.request.bitmapConfig
 import coil3.request.crossfade
+import com.gunkel.android.affectus.theme.Affectus
 import com.gunkel.android.drift.feature.map.data.models.Place
 import com.gunkel.android.drift.feature.map.data.models.PlaceType
 import com.gunkel.android.drift.core.ui.R
 
 @Composable
-fun PlaceInfoWindow(
+fun PlaceInfoWindowContent(
     place: Place,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .width(280.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.White)
-            .padding(16.dp),
-        horizontalAlignment = Alignment.Start
-    ) {
+    Column(modifier = modifier) {
         Text(
             text = place.name,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
+            style = Affectus.typography.titleMedium,
+            color = Affectus.colors.onBackground,
             maxLines = 2
         )
         
         Text(
             text = stringResource(id = mapPlaceTypeToStringRes(place.type)),
-            style = MaterialTheme.typography.labelMedium,
-            color = Color.Gray,
-            modifier = Modifier.padding(bottom = 12.dp)
+            style = Affectus.typography.labelSmall,
+            color = Affectus.colors.secondary.copy(alpha = 0.6f),
+            modifier = Modifier.padding(bottom = Affectus.dimens.spacingM)
         )
 
         if (place.photo != null) {
@@ -63,8 +52,8 @@ fun PlaceInfoWindow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(180.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.LightGray)
+                    .clip(RoundedCornerShape(Affectus.dimens.radiusM))
+                    .background(Affectus.colors.secondary.copy(alpha = 0.1f))
             ) {
                 val data = place.photo
                 if (data is Bitmap) {
@@ -75,9 +64,6 @@ fun PlaceInfoWindow(
                         contentScale = ContentScale.Crop
                     )
                 } else {
-                    // Note: We're omitting the "forced refresh" logic here because
-                    // DriftRepository now fetches bitmaps directly in the background.
-                    // If we ever use URIs again, we'll need a non-looping refresh.
                     Image(
                         painter = rememberAsyncImagePainter(
                             model = ImageRequest.Builder(LocalContext.current)
@@ -99,9 +85,9 @@ fun PlaceInfoWindow(
         if (!description.isNullOrBlank()) {
             Text(
                 text = description,
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.DarkGray,
-                modifier = Modifier.padding(top = 12.dp),
+                style = Affectus.typography.bodyMedium,
+                color = Affectus.colors.onBackground.copy(alpha = 0.8f),
+                modifier = Modifier.padding(top = Affectus.dimens.spacingM),
                 lineHeight = 20.sp
             )
         }

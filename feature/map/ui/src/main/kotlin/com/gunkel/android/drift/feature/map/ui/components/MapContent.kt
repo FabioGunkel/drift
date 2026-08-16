@@ -1,5 +1,6 @@
 package com.gunkel.android.drift.feature.map.ui.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -9,30 +10,38 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.gunkel.android.drift.core.common.PolylineDecoder
-import com.gunkel.android.drift.feature.map.data.models.Place
-import com.gunkel.android.drift.feature.map.ui.viewmodels.DriftUiState
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.*
+import com.gunkel.android.affectus.components.DriftButton
+import com.gunkel.android.affectus.components.DriftInfoWindow
+import com.gunkel.android.affectus.theme.Affectus
+import com.gunkel.android.affectus.theme.MarkerUtils
+import com.gunkel.android.drift.core.common.PolylineDecoder
+import com.gunkel.android.drift.feature.map.ui.viewmodels.DriftUiState
 
+@SuppressLint("MissingPermission")
 @Composable
 fun MapContent(
     uiState: DriftUiState,
     onDriftClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(-23.5616, -46.6866), 15f)
+    }
+    
+    val mapStyleOptions = remember(context) {
+        MapStyleOptions.loadRawResourceStyle(context, com.gunkel.android.drift.core.ui.R.raw.map_style)
     }
 
     // Auto-zoom to path when found
@@ -55,7 +64,8 @@ fun MapContent(
             .fillMaxSize()
             .semantics { testTagsAsResourceId = true },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
+            DriftButton(
+                isLoading = uiState is DriftUiState.Loading,
                 onClick = {
                     val projection = cameraPositionState.projection
                     val radius = if (projection != null) {
@@ -69,23 +79,12 @@ fun MapContent(
                             corner.latitude, corner.longitude,
                             results
                         )
-                        results[0].toInt().coerceIn(500, 5000)
+                        results[0].toInt().coerceIn(1, 5000)
                     } else 1000
                     onDriftClick(radius)
                 },
-                modifier = Modifier.testTag("drift_button"),
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = Color.White
-            ) {
-                if (uiState is DriftUiState.Loading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.padding(end = 8.dp),
-                        color = Color.White,
-                        strokeWidth = 2.dp
-                    )
-                }
-                Text(text = "Drift")
-            }
+                modifier = Modifier.testTag("drift_button")
+            )
         },
         floatingActionButtonPosition = FabPosition.Center
     ) { paddingValues ->
@@ -101,7 +100,10 @@ fun MapContent(
                     zoomControlsEnabled = false,
                     myLocationButtonEnabled = true
                 ),
-                properties = MapProperties(isMyLocationEnabled = true)
+                properties = MapProperties(
+                    isMyLocationEnabled = true,
+                    mapStyleOptions = mapStyleOptions
+                )
             ) {
                 if (uiState is DriftUiState.PathFound) {
                     val decodedPoints = remember(uiState.polylinePoints) {
@@ -113,7 +115,7 @@ fun MapContent(
                     // Main Path Polyline
                     Polyline(
                         points = decodedPoints,
-                        color = Color(0xFF004D40), // Drift Teal
+                        color = Affectus.colors.primary,
                         width = 15f,
                         geodesic = true
                     )
@@ -121,23 +123,29 @@ fun MapContent(
                     // Path Glow/Border
                     Polyline(
                         points = decodedPoints,
-                        color = Color(0xFF004D40).copy(alpha = 0.3f),
+                        color = Affectus.colors.primary.copy(alpha = 0.3f),
                         width = 25f
                     )
                     
+                    val startMarker = MarkerUtils.createMarker(Affectus.colors.tertiary, isKeyPoint = true)
+                    val endMarker = MarkerUtils.createMarker(Affectus.colors.primary, isKeyPoint = true)
+                    val midMarker = MarkerUtils.createMarker(Affectus.colors.secondary, isKeyPoint = false)
+
                     uiState.stops.forEachIndexed { index, place ->
-                        val markerColor = when (index) {
-                            0 -> BitmapDescriptorFactory.HUE_GREEN // Start
-                            uiState.stops.size - 1 -> BitmapDescriptorFactory.HUE_RED // End
-                            else -> BitmapDescriptorFactory.HUE_AZURE
+                        val markerIcon = when (index) {
+                            0 -> startMarker
+                            uiState.stops.size - 1 -> endMarker
+                            else -> midMarker
                         }
                         
                         MarkerInfoWindowContent(
                             state = MarkerState(position = LatLng(place.location.latitude, place.location.longitude)),
                             title = "${index + 1}. ${place.name}",
-                            icon = BitmapDescriptorFactory.defaultMarker(markerColor)
+                            icon = markerIcon
                         ) {
-                            PlaceInfoWindow(place = place)
+                            DriftInfoWindow {
+                                PlaceInfoWindowContent(place = place)
+                            }
                         }
                     }
                 }
@@ -154,13 +162,4 @@ fun MapContent(
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun MapContentPreview() {
-    MapContent(
-        uiState = DriftUiState.Idle,
-        onDriftClick = {}
-    )
 }
