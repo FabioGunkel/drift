@@ -21,12 +21,11 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.*
+import com.gunkel.android.affectus.components.DriftButton
+import com.gunkel.android.affectus.components.DriftInfoWindow
 import com.gunkel.android.affectus.theme.Affectus
 import com.gunkel.android.affectus.theme.MarkerUtils
 import com.gunkel.android.drift.core.common.PolylineDecoder
-import com.gunkel.android.drift.core.ui.R as CoreR
-import com.gunkel.android.drift.core.ui.components.DriftButton
-import com.gunkel.android.drift.core.ui.components.DriftInfoWindow
 import com.gunkel.android.drift.feature.map.ui.viewmodels.DriftUiState
 
 @SuppressLint("MissingPermission")
@@ -42,7 +41,7 @@ fun MapContent(
     }
     
     val mapStyleOptions = remember(context) {
-        MapStyleOptions.loadRawResourceStyle(context, CoreR.raw.map_style)
+        MapStyleOptions.loadRawResourceStyle(context, com.gunkel.android.drift.core.ui.R.raw.map_style)
     }
 
     // Auto-zoom to path when found

@@ -1,4 +1,4 @@
-package com.gunkel.android.drift.core.ui.components
+package com.gunkel.android.affectus.components
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.gunkel.android.affectus.theme.Affectus
-import com.gunkel.android.drift.core.ui.R as CoreR
+import com.gunkel.android.affectus.R
 
 @Composable
 fun DriftButton(
@@ -77,7 +77,7 @@ fun DriftButton(
     ) {
         // Text Layer
         Text(
-            text = stringResource(id = CoreR.string.drift_button_label),
+            text = stringResource(id = R.string.drift_button_label),
             style = Affectus.typography.titleMedium,
             color = Affectus.colors.background,
             modifier = Modifier.graphicsLayer {

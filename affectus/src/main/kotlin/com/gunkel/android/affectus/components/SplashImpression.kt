@@ -1,4 +1,4 @@
-package com.gunkel.android.drift.core.ui.screens
+package com.gunkel.android.affectus.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.gunkel.android.affectus.theme.Affectus
-import com.gunkel.android.drift.core.ui.R
+import com.gunkel.android.affectus.R
 
 @Composable
 fun SplashImpression(

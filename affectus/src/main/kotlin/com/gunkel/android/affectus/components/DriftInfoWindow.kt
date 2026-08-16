@@ -1,4 +1,4 @@
-package com.gunkel.android.drift.core.ui.components
+package com.gunkel.android.affectus.components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
