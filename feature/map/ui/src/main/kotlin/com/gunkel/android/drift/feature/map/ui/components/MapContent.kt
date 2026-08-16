@@ -26,7 +26,7 @@ import com.gunkel.android.affectus.theme.MarkerUtils
 import com.gunkel.android.drift.core.common.PolylineDecoder
 import com.gunkel.android.drift.core.ui.R as CoreR
 import com.gunkel.android.drift.core.ui.components.DriftButton
-import com.gunkel.android.drift.core.ui.components.PlaceInfoWindow
+import com.gunkel.android.drift.core.ui.components.DriftInfoWindow
 import com.gunkel.android.drift.feature.map.ui.viewmodels.DriftUiState
 
 @SuppressLint("MissingPermission")
@@ -144,7 +144,9 @@ fun MapContent(
                             title = "${index + 1}. ${place.name}",
                             icon = markerIcon
                         ) {
-                            PlaceInfoWindow(place = place)
+                            DriftInfoWindow {
+                                PlaceInfoWindowContent(place = place)
+                            }
                         }
                     }
                 }
