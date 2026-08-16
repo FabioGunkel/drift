@@ -8,7 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.gunkel.android.affectus.theme.AffectusTheme
+import com.gunkel.android.affectus.theme.Affectus
 import com.gunkel.android.drift.core.ui.R
 
 @Composable
@@ -18,7 +18,7 @@ fun SplashImpression(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(AffectusTheme.colors.primary),
+            .background(Affectus.colors.primary),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -26,14 +26,14 @@ fun SplashImpression(
         ) {
             Text(
                 text = stringResource(id = R.string.app_display_name),
-                color = AffectusTheme.colors.secondary,
-                style = AffectusTheme.typography.titleLarge
+                color = Affectus.colors.secondary,
+                style = Affectus.typography.titleLarge
             )
-            Spacer(modifier = Modifier.height(AffectusTheme.dimens.spacingM))
+            Spacer(modifier = Modifier.height(Affectus.dimens.spacingM))
             Text(
                 text = stringResource(id = R.string.app_slogan),
-                color = AffectusTheme.colors.onPrimary.copy(alpha = 0.7f),
-                style = AffectusTheme.typography.bodyMedium
+                color = Affectus.colors.onPrimary.copy(alpha = 0.7f),
+                style = Affectus.typography.bodyMedium
             )
         }
     }
@@ -42,7 +42,7 @@ fun SplashImpression(
 @Preview
 @Composable
 fun SplashImpressionPreview() {
-    AffectusTheme {
+    Affectus {
         SplashImpression()
     }
 }

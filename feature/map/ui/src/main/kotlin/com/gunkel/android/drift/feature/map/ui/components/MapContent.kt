@@ -1,5 +1,6 @@
 package com.gunkel.android.drift.feature.map.ui.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -9,28 +10,26 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.android.gms.maps.model.MapStyleOptions
-import com.gunkel.android.drift.core.common.PolylineDecoder
-import com.gunkel.android.drift.core.ui.R as CoreR
-import com.gunkel.android.drift.feature.map.data.models.Place
-import com.gunkel.android.drift.feature.map.ui.viewmodels.DriftUiState
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.*
-import com.gunkel.android.affectus.theme.AffectusTheme
+import com.gunkel.android.affectus.theme.Affectus
 import com.gunkel.android.affectus.theme.MarkerUtils
+import com.gunkel.android.drift.core.common.PolylineDecoder
+import com.gunkel.android.drift.core.ui.R as CoreR
+import com.gunkel.android.drift.core.ui.components.DriftButton
+import com.gunkel.android.drift.core.ui.components.PlaceInfoWindow
+import com.gunkel.android.drift.feature.map.ui.viewmodels.DriftUiState
 
+@SuppressLint("MissingPermission")
 @Composable
 fun MapContent(
     uiState: DriftUiState,
@@ -117,7 +116,7 @@ fun MapContent(
                     // Main Path Polyline
                     Polyline(
                         points = decodedPoints,
-                        color = AffectusTheme.colors.primary,
+                        color = Affectus.colors.primary,
                         width = 15f,
                         geodesic = true
                     )
@@ -125,13 +124,13 @@ fun MapContent(
                     // Path Glow/Border
                     Polyline(
                         points = decodedPoints,
-                        color = AffectusTheme.colors.primary.copy(alpha = 0.3f),
+                        color = Affectus.colors.primary.copy(alpha = 0.3f),
                         width = 25f
                     )
                     
-                    val startMarker = MarkerUtils.createMarker(AffectusTheme.colors.tertiary, isKeyPoint = true)
-                    val endMarker = MarkerUtils.createMarker(AffectusTheme.colors.primary, isKeyPoint = true)
-                    val midMarker = MarkerUtils.createMarker(AffectusTheme.colors.secondary, isKeyPoint = false)
+                    val startMarker = MarkerUtils.createMarker(Affectus.colors.tertiary, isKeyPoint = true)
+                    val endMarker = MarkerUtils.createMarker(Affectus.colors.primary, isKeyPoint = true)
+                    val midMarker = MarkerUtils.createMarker(Affectus.colors.secondary, isKeyPoint = false)
 
                     uiState.stops.forEachIndexed { index, place ->
                         val markerIcon = when (index) {
@@ -140,7 +139,7 @@ fun MapContent(
                             else -> midMarker
                         }
                         
-                        MarkerInfoWindow(
+                        MarkerInfoWindowContent(
                             state = MarkerState(position = LatLng(place.location.latitude, place.location.longitude)),
                             title = "${index + 1}. ${place.name}",
                             icon = markerIcon
@@ -162,13 +161,4 @@ fun MapContent(
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun MapContentPreview() {
-    MapContent(
-        uiState = DriftUiState.Idle,
-        onDriftClick = {}
-    )
 }

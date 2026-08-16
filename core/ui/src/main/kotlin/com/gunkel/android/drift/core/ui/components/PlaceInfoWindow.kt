@@ -1,4 +1,4 @@
-package com.gunkel.android.drift.feature.map.ui.components
+package com.gunkel.android.drift.core.ui.components
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.Canvas
@@ -30,15 +30,15 @@ import coil3.request.crossfade
 import com.gunkel.android.drift.feature.map.data.models.Place
 import com.gunkel.android.drift.feature.map.data.models.PlaceType
 import com.gunkel.android.drift.core.ui.R
-import com.gunkel.android.affectus.theme.AffectusTheme
+import com.gunkel.android.affectus.theme.Affectus
 
 @Composable
 fun PlaceInfoWindow(
     place: Place,
     modifier: Modifier = Modifier
 ) {
-    val backgroundColor = AffectusTheme.colors.background
-    val borderColor = AffectusTheme.colors.secondary.copy(alpha = 0.3f)
+    val backgroundColor = Affectus.colors.background
+    val borderColor = Affectus.colors.secondary.copy(alpha = 0.3f)
     
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -47,24 +47,24 @@ fun PlaceInfoWindow(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(AffectusTheme.dimens.borderThin, borderColor, RoundedCornerShape(AffectusTheme.dimens.radiusXL))
-                .clip(RoundedCornerShape(AffectusTheme.dimens.radiusXL))
+                .border(Affectus.dimens.borderThin, borderColor, RoundedCornerShape(Affectus.dimens.radiusXL))
+                .clip(RoundedCornerShape(Affectus.dimens.radiusXL))
                 .background(backgroundColor)
-                .padding(AffectusTheme.dimens.spacingM),
+                .padding(Affectus.dimens.spacingM),
             horizontalAlignment = Alignment.Start
         ) {
             Text(
                 text = place.name,
-                style = AffectusTheme.typography.titleMedium,
-                color = AffectusTheme.colors.onBackground,
+                style = Affectus.typography.titleMedium,
+                color = Affectus.colors.onBackground,
                 maxLines = 2
             )
             
             Text(
                 text = stringResource(id = mapPlaceTypeToStringRes(place.type)),
-                style = AffectusTheme.typography.labelSmall,
-                color = AffectusTheme.colors.secondary.copy(alpha = 0.6f),
-                modifier = Modifier.padding(bottom = AffectusTheme.dimens.spacingM)
+                style = Affectus.typography.labelSmall,
+                color = Affectus.colors.secondary.copy(alpha = 0.6f),
+                modifier = Modifier.padding(bottom = Affectus.dimens.spacingM)
             )
 
             if (place.photo != null) {
@@ -72,8 +72,8 @@ fun PlaceInfoWindow(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
-                        .clip(RoundedCornerShape(AffectusTheme.dimens.radiusM))
-                        .background(AffectusTheme.colors.secondary.copy(alpha = 0.1f))
+                        .clip(RoundedCornerShape(Affectus.dimens.radiusM))
+                        .background(Affectus.colors.secondary.copy(alpha = 0.1f))
                 ) {
                     val data = place.photo
                     if (data is Bitmap) {
@@ -105,9 +105,9 @@ fun PlaceInfoWindow(
             if (!description.isNullOrBlank()) {
                 Text(
                     text = description,
-                    style = AffectusTheme.typography.bodyMedium,
-                    color = AffectusTheme.colors.onBackground.copy(alpha = 0.8f),
-                    modifier = Modifier.padding(top = AffectusTheme.dimens.spacingM),
+                    style = Affectus.typography.bodyMedium,
+                    color = Affectus.colors.onBackground.copy(alpha = 0.8f),
+                    modifier = Modifier.padding(top = Affectus.dimens.spacingM),
                     lineHeight = 20.sp
                 )
             }
@@ -116,7 +116,7 @@ fun PlaceInfoWindow(
         // The "V" anchor
         Canvas(
             modifier = Modifier
-                .size(AffectusTheme.dimens.radiusXL, AffectusTheme.dimens.radiusM)
+                .size(Affectus.dimens.radiusXL, Affectus.dimens.radiusM)
                 .offset(y = (-1).dp) // Overlap to make it seamless
         ) {
             val path = Path().apply {

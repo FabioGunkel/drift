@@ -1,4 +1,4 @@
-package com.gunkel.android.drift.feature.map.ui.components
+package com.gunkel.android.drift.core.ui.components
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.gunkel.android.affectus.theme.AffectusTheme
+import com.gunkel.android.affectus.theme.Affectus
 import com.gunkel.android.drift.core.ui.R as CoreR
 
 @Composable
@@ -54,32 +54,32 @@ fun DriftButton(
 
     Box(
         modifier = modifier
-            .width(110.dp) // Keep fixed width for stability
-            .height(AffectusTheme.dimens.buttonHeightMedium)
+            .width(110.dp) // Even smaller button
+            .height(Affectus.dimens.buttonHeightMedium)
             // Outer Gold Stroke
             .border(
-                AffectusTheme.dimens.borderThick, 
-                AffectusTheme.colors.primary, 
-                RoundedCornerShape(AffectusTheme.dimens.radiusXL)
+                Affectus.dimens.borderThick, 
+                Affectus.colors.primary, 
+                RoundedCornerShape(Affectus.dimens.radiusXL)
             )
-            .padding(AffectusTheme.dimens.borderThick)
+            .padding(Affectus.dimens.borderThick)
             // Inner Off-white Stroke
             .border(
-                AffectusTheme.dimens.borderMedium, 
-                AffectusTheme.colors.background, 
-                RoundedCornerShape(AffectusTheme.dimens.radiusXL - AffectusTheme.dimens.borderThick)
+                Affectus.dimens.borderMedium, 
+                Affectus.colors.background, 
+                RoundedCornerShape(Affectus.dimens.radiusXL - Affectus.dimens.borderThick)
             )
-            .padding(AffectusTheme.dimens.borderMedium)
-            .clip(RoundedCornerShape(AffectusTheme.dimens.radiusL))
-            .background(AffectusTheme.colors.primary)
+            .padding(Affectus.dimens.borderMedium)
+            .clip(RoundedCornerShape(Affectus.dimens.radiusL))
+            .background(Affectus.colors.primary)
             .clickable(enabled = !isLoading) { onClick() },
         contentAlignment = Alignment.Center
     ) {
         // Text Layer
         Text(
             text = stringResource(id = CoreR.string.drift_button_label),
-            style = AffectusTheme.typography.titleMedium,
-            color = AffectusTheme.colors.background,
+            style = Affectus.typography.titleMedium,
+            color = Affectus.colors.background,
             modifier = Modifier.graphicsLayer {
                 scaleY = textScaleY
                 alpha = if (textScaleY > 0.1f) 1f else 0f
@@ -88,11 +88,11 @@ fun DriftButton(
 
         // Path Animation Layer (Footsteps)
         if (pathAlpha > 0.01f) {
-            val pathColor = AffectusTheme.colors.background
+            val pathColor = Affectus.colors.background
             Canvas(
                 modifier = Modifier
                     .fillMaxWidth(0.7f) // Matches approximate text length
-                    .height(AffectusTheme.dimens.iconS)
+                    .height(Affectus.dimens.iconS)
                     .graphicsLayer { alpha = pathAlpha }
             ) {
                 val width = size.width
