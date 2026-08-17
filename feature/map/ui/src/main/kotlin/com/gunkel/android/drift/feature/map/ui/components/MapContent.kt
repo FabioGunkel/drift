@@ -74,15 +74,28 @@ fun MapContent(
                     
                     val radius = if (projection != null) {
                         val visibleRegion = projection.visibleRegion
-                        val corner = visibleRegion.farLeft
+                        val center = cameraPositionState.position.target
                         
-                        val results = FloatArray(1)
+                        // Calculate average of half-width and half-height as radius
+                        val resultsWidth = FloatArray(1)
+                        val resultsHeight = FloatArray(1)
+                        
+                        // Width distance (Center to FarLeft longitude, same latitude)
                         android.location.Location.distanceBetween(
                             center.latitude, center.longitude,
-                            corner.latitude, corner.longitude,
-                            results
+                            center.latitude, visibleRegion.farLeft.longitude,
+                            resultsWidth
                         )
-                        results[0].toInt().coerceIn(500, 5000)
+                        
+                        // Height distance (Center to FarLeft latitude, same longitude)
+                        android.location.Location.distanceBetween(
+                            center.latitude, center.longitude,
+                            visibleRegion.farLeft.latitude, center.longitude,
+                            resultsHeight
+                        )
+                        
+                        val radiusAvg = (resultsWidth[0] + resultsHeight[0]) / 2f
+                        radiusAvg.toInt().coerceIn(500, 5000)
                     } else 1000
                     onDriftClick(radius, searchCenter)
                 },
