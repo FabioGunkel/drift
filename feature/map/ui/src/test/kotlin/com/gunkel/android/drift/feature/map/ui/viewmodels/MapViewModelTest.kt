@@ -35,15 +35,17 @@ class MapViewModelTest {
     @Test
     fun `onDriftClicked success should update uiState to PathFound`() = runTest {
         // Given
-        val location = Location(0.0, 0.0)
+        val mapCenter = Location(0.0, 0.0)
+        val userLocation = Location(0.01, 0.01)
+        val radius = 1000
         val path = DriftPath(
             stops = listOf(Place("1", "Test", Location(0.1, 0.1), type = PlaceType.OTHER)),
             polylinePoints = "abc"
         )
-        coEvery { getDriftWalkingPathUseCase(location) } returns DataState.Success(path)
+        coEvery { getDriftWalkingPathUseCase(mapCenter, userLocation, radius) } returns DataState.Success(path)
 
         // When
-        viewModel.onDriftClicked(location)
+        viewModel.onDriftClicked(mapCenter, userLocation, radius)
         advanceUntilIdle()
 
         // Then
