@@ -25,6 +25,7 @@ import com.gunkel.android.affectus.components.DriftButton
 import com.gunkel.android.affectus.components.DriftInfoWindow
 import com.gunkel.android.affectus.theme.Affectus
 import com.gunkel.android.affectus.theme.MarkerUtils
+import com.gunkel.android.drift.core.common.Location
 import com.gunkel.android.drift.core.common.PolylineDecoder
 import com.gunkel.android.drift.feature.map.ui.viewmodels.DriftUiState
 
@@ -32,7 +33,7 @@ import com.gunkel.android.drift.feature.map.ui.viewmodels.DriftUiState
 @Composable
 fun MapContent(
     uiState: DriftUiState,
-    onDriftClick: (Int) -> Unit,
+    onDriftClick: (Int, Location) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -68,20 +69,35 @@ fun MapContent(
                 isLoading = uiState is DriftUiState.Loading,
                 onClick = {
                     val projection = cameraPositionState.projection
+                    val center = cameraPositionState.position.target
+                    val searchCenter = Location(center.latitude, center.longitude)
+                    
                     val radius = if (projection != null) {
                         val visibleRegion = projection.visibleRegion
                         val center = cameraPositionState.position.target
-                        val corner = visibleRegion.farLeft
                         
-                        val results = FloatArray(1)
+                        // Calculate average of half-width and half-height as radius
+                        val resultsWidth = FloatArray(1)
+                        val resultsHeight = FloatArray(1)
+                        
+                        // Width distance (Center to FarLeft longitude, same latitude)
                         android.location.Location.distanceBetween(
                             center.latitude, center.longitude,
-                            corner.latitude, corner.longitude,
-                            results
+                            center.latitude, visibleRegion.farLeft.longitude,
+                            resultsWidth
                         )
-                        results[0].toInt().coerceIn(1, 5000)
+                        
+                        // Height distance (Center to FarLeft latitude, same longitude)
+                        android.location.Location.distanceBetween(
+                            center.latitude, center.longitude,
+                            visibleRegion.farLeft.latitude, center.longitude,
+                            resultsHeight
+                        )
+                        
+                        val radiusAvg = (resultsWidth[0] + resultsHeight[0]) / 2f
+                        radiusAvg.toInt().coerceIn(500, 5000)
                     } else 1000
-                    onDriftClick(radius)
+                    onDriftClick(radius, searchCenter)
                 },
                 modifier = Modifier.testTag("drift_button")
             )
@@ -138,7 +154,7 @@ fun MapContent(
                             else -> midMarker
                         }
                         
-                        MarkerInfoWindowContent(
+                        MarkerInfoWindow(
                             state = MarkerState(position = LatLng(place.location.latitude, place.location.longitude)),
                             title = "${index + 1}. ${place.name}",
                             icon = markerIcon

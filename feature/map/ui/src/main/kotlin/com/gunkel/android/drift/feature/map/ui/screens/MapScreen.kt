@@ -1,10 +1,7 @@
 package com.gunkel.android.drift.feature.map.ui.screens
 
 import android.annotation.SuppressLint
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.google.android.gms.location.LocationServices
@@ -25,14 +22,20 @@ fun MapScreen(
         LocationServices.getFusedLocationProviderClient(context) 
     }
 
+    var userLocation by remember { mutableStateOf<Location?>(null) }
+
+    LaunchedEffect(Unit) {
+        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            if (location != null) {
+                userLocation = Location(location.latitude, location.longitude)
+            }
+        }
+    }
+
     MapContent(
         uiState = uiState,
-        onDriftClick = { radius ->
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) {
-                    viewModel.onDriftClicked(Location(location.latitude, location.longitude), radius)
-                }
-            }
+        onDriftClick = { radius, mapCenter ->
+            viewModel.onDriftClicked(mapCenter, userLocation, radius)
         },
         modifier = modifier
     )
