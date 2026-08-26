@@ -7,6 +7,7 @@ data class Place(
     val name: String,
     val location: Location,
     val description: String? = null,
+    val aiSummary: String? = null,
     val type: PlaceType,
     val photo: Any? = null, // Can be Bitmap, String (URL), or Uri
     val userRatingsTotal: Int = 0,

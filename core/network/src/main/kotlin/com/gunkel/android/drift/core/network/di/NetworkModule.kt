@@ -1,6 +1,7 @@
 package com.gunkel.android.drift.core.network.di
 
 import com.gunkel.android.drift.core.network.api.DirectionsApi
+import com.gunkel.android.drift.core.network.api.PlacesV1Api
 import com.gunkel.android.drift.core.network.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -12,7 +13,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 val networkModule = module {
     single {
         HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level = if (BuildConfig.DEBUG) {
+                HttpLoggingInterceptor.Level.BODY
+            } else {
+                HttpLoggingInterceptor.Level.NONE
+            }
         }
     }
 
@@ -39,4 +44,5 @@ val networkModule = module {
     }
 
     single { get<Retrofit>().create(DirectionsApi::class.java) }
+    single { get<Retrofit>().create(PlacesV1Api::class.java) }
 }

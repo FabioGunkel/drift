@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.androidx.startup)
     implementation("io.insert-koin:koin-androidx-startup:4.2.1")
     implementation(libs.koin.android)
+    implementation(libs.navigation.compose)
 
     testImplementation(libs.junit)
 

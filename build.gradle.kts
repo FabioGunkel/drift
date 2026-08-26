@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.roborazzi) apply false
     alias(libs.plugins.maps.plugin) apply false
     alias(libs.plugins.kover)
+    alias(libs.plugins.ksp) apply false
 }
 
 //buildscript {

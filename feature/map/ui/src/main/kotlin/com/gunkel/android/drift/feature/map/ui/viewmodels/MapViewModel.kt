@@ -6,13 +6,15 @@ import com.gunkel.android.drift.core.common.DataState
 import com.gunkel.android.drift.core.common.Location
 import com.gunkel.android.drift.feature.map.data.models.Place
 import com.gunkel.android.drift.feature.map.domain.usecases.GetDriftWalkingPathUseCase
+import com.gunkel.android.drift.feature.map.domain.usecases.ignored.AddIgnoredPlaceUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class MapViewModel(
-    private val getDriftWalkingPathUseCase: GetDriftWalkingPathUseCase
+    private val getDriftWalkingPathUseCase: GetDriftWalkingPathUseCase,
+    private val addIgnoredPlaceUseCase: AddIgnoredPlaceUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<DriftUiState>(DriftUiState.Idle)
@@ -33,6 +35,13 @@ class MapViewModel(
             }
         }
     }
+
+    fun onIgnorePlaceClicked(place: Place) {
+        viewModelScope.launch {
+            addIgnoredPlaceUseCase(place)
+            _uiState.value = DriftUiState.PlaceIgnored(place.name)
+        }
+    }
 }
 
 sealed class DriftUiState {
@@ -40,4 +49,5 @@ sealed class DriftUiState {
     data object Loading : DriftUiState()
     data class PathFound(val stops: List<Place>, val polylinePoints: String) : DriftUiState()
     data class Error(val message: String) : DriftUiState()
+    data class PlaceIgnored(val placeName: String) : DriftUiState()
 }

@@ -20,8 +20,11 @@ class CalculateDriftPathUseCase(
     ): DataState<List<Place>> {
         Log.d("DriftUseCase", "Starting Drift calculation centered at: $searchCenter, starting at: $startLocation, radius: $radius")
         
+        val ignoredIds = repository.getIgnoredIds()
+        
         val landmarkTypes = listOf(
-            "tourist_attraction", "museum", "art_gallery", "park", "library", "church", "historical_place", "market"
+            "tourist_attraction", "museum", "art_gallery", "park", "library", "church", "historical_landmark", 
+            "market"
         )
         val landmarksResult = repository.getNearbyPlaces(searchCenter.latitude, searchCenter.longitude, radius, landmarkTypes)
         
@@ -34,26 +37,35 @@ class CalculateDriftPathUseCase(
         
         val allLandmarks = (landmarksResult as DataState.Success).data
             .filter { it.type != PlaceType.RESTAURANT && it.type != PlaceType.OTHER && it.type != PlaceType.STORE }
-        
-        val allRestaurants = if (restaurantsResult is DataState.Success) {
-            restaurantsResult.data.filter { it.type == PlaceType.RESTAURANT }
-        } else emptyList()
+            .filter { it.id !in ignoredIds }
         
         val top10Landmarks = allLandmarks
             .sortedByDescending { calculateScore(it, searchCenter, radius) }
             .take(10)
+
+        // Check if there are already restaurants/pubs in the landmarks list
+        val hasRestaurantsInLandmarks = top10Landmarks.any { it.type == PlaceType.RESTAURANT }
+        
+        val selectedStops = top10Landmarks.toMutableList()
+
+        if (!hasRestaurantsInLandmarks) {
+            val allRestaurants = if (restaurantsResult is DataState.Success) {
+                restaurantsResult.data.filter { it.type == PlaceType.RESTAURANT && it.id !in ignoredIds }
+            } else emptyList()
+
+            val top3Restaurants = allRestaurants
+                .sortedByDescending { calculateScore(it, searchCenter, radius) }
+                .take(3)
             
-        val top3Restaurants = allRestaurants
-            .sortedByDescending { calculateScore(it, searchCenter, radius) }
-            .take(3)
-            
-        val selectedStops = (top10Landmarks + top3Restaurants).toMutableList()
+            selectedStops.addAll(top3Restaurants)
+            Log.d("DriftUseCase", "Added ${top3Restaurants.size} extra restaurants as none were found in landmarks")
+        }
         
         if (selectedStops.isEmpty()) {
             return DataState.Error("No relevant places found nearby")
         }
         
-        Log.d("DriftUseCase", "Selected ${top10Landmarks.size} landmarks and ${top3Restaurants.size} restaurants")
+        Log.d("DriftUseCase", "Selected total of ${selectedStops.size} stops")
 
         val effectiveStart = startLocation ?: searchCenter
         val initialPath = buildNearestNeighborPath(effectiveStart, selectedStops)

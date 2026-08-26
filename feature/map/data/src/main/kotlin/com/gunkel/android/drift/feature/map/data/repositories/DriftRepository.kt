@@ -6,6 +6,7 @@ import android.util.Log
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.CircularBounds
 import com.google.android.libraries.places.api.model.Place.Field
+import com.google.android.libraries.places.api.model.Review
 import com.google.android.libraries.places.api.net.FetchResolvedPhotoUriRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.api.net.SearchNearbyRequest
@@ -17,21 +18,27 @@ import coil3.toBitmap
 import com.gunkel.android.drift.core.common.DataState
 import com.gunkel.android.drift.core.common.Location
 import com.gunkel.android.drift.core.network.api.DirectionsApi
+import com.gunkel.android.drift.core.network.api.PlacesV1Api
+import com.gunkel.android.drift.feature.map.data.local.dao.IgnoredPlaceDao
+import com.gunkel.android.drift.feature.map.data.local.entities.IgnoredPlaceEntity
 import com.gunkel.android.drift.feature.map.data.models.Place
 import com.gunkel.android.drift.feature.map.data.models.PlaceType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 class DriftRepository(
     private val directionsApi: DirectionsApi,
+    private val placesV1Api: PlacesV1Api,
     private val placesClient: PlacesClient,
     private val imageLoader: ImageLoader,
     private val context: Context,
-    private val apiKey: String
+    private val apiKey: String,
+    private val ignoredPlaceDao: IgnoredPlaceDao
 ) {
     suspend fun getNearbyPlaces(
         lat: Double,
@@ -116,6 +123,7 @@ class DriftRepository(
                                 googlePlace.location?.longitude ?: 0.0
                             ),
                             description = googlePlace.editorialSummary,
+                            aiSummary = null, // Generative summary not available in current SDK version
                             type = mapGoogleTypeToDrift(googlePlace.placeTypes),
                             photo = finalPhoto,
                             userRatingsTotal = googlePlace.userRatingCount ?: 0,
@@ -142,8 +150,8 @@ class DriftRepository(
         if (types == null) return PlaceType.OTHER
         return when {
             types.contains("museum") || types.contains("art_gallery") -> PlaceType.MUSEUM
-            types.contains("park") || types.contains("natural_feature") || types.contains("town_square") -> PlaceType.PARK
-            types.contains("tourist_attraction") || types.contains("historical_landmark") || types.contains("landmark") || types.contains("historical_place") -> PlaceType.TOURIST_ATTRACTION
+            types.contains("park") || types.contains("natural_feature") -> PlaceType.PARK
+            types.contains("tourist_attraction") || types.contains("historical_landmark") || types.contains("landmark") -> PlaceType.TOURIST_ATTRACTION
             types.contains("restaurant") || types.contains("cafe") || types.contains("food") || types.contains("bar") -> PlaceType.RESTAURANT
             types.contains("store") || types.contains("shopping_mall") || types.contains("clothing_store") || types.contains("supermarket") -> PlaceType.STORE
             else -> PlaceType.OTHER
@@ -162,6 +170,32 @@ class DriftRepository(
             }
         } catch (e: Exception) {
             DataState.Error("Failed to fetch directions", e)
+        }
+    }
+
+    fun getIgnoredPlaces(): Flow<List<IgnoredPlaceEntity>> = ignoredPlaceDao.getAllIgnoredPlaces()
+
+    suspend fun ignorePlace(place: Place) {
+        ignoredPlaceDao.insertIgnoredPlace(
+            IgnoredPlaceEntity(
+                id = place.id,
+                title = place.name,
+                photoReference = null // In a real scenario, we might want to store a photo reference or URL
+            )
+        )
+    }
+
+    suspend fun removeIgnoredPlace(id: String) = ignoredPlaceDao.deleteById(id)
+
+    suspend fun getIgnoredIds(): List<String> = ignoredPlaceDao.getIgnoredIds()
+
+    suspend fun getPlaceReviewSummary(placeId: String): String? {
+        return try {
+            val response = placesV1Api.getPlaceDetails(placeId, apiKey)
+            response.reviewSummary?.text?.text
+        } catch (e: Exception) {
+            Log.e("DriftRepository", "Error fetching AI summary: ${e.message}")
+            null
         }
     }
 }

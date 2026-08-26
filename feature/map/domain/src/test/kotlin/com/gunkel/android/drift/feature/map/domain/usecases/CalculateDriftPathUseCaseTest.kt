@@ -48,6 +48,7 @@ class CalculateDriftPathUseCaseTest {
             rating = 3.0
         )
 
+        coEvery { repository.getIgnoredIds() } returns emptyList()
         // Landmarks call returns landmark and other
         coEvery { repository.getNearbyPlaces(any(), any(), 1000, match { it.contains("historical_place") }) } returns DataState.Success(listOf(landmark, other))
         // Restaurants call returns restaurant
@@ -67,6 +68,26 @@ class CalculateDriftPathUseCaseTest {
     }
 
     @Test
+    fun `invoke should filter out ignored places`() = runTest {
+        // Given
+        val mapCenter = Location(0.0, 0.0)
+        val ignoredPlace = Place(id = "ignored", name = "Ignored", location = Location(0.001, 0.001), type = PlaceType.MUSEUM, userRatingsTotal = 100, rating = 4.0)
+        val validPlace = Place(id = "valid", name = "Valid", location = Location(0.002, 0.002), type = PlaceType.MUSEUM, userRatingsTotal = 100, rating = 4.0)
+
+        coEvery { repository.getIgnoredIds() } returns listOf("ignored")
+        coEvery { repository.getNearbyPlaces(any(), any(), any(), any()) } returns DataState.Success(listOf(ignoredPlace, validPlace))
+
+        // When
+        val result = useCase(mapCenter, null, 1000)
+
+        // Then
+        assertTrue(result is DataState.Success)
+        val path = (result as DataState.Success).data
+        assertEquals(1, path.size)
+        assertEquals("valid", path[0].id)
+    }
+
+    @Test
     fun `score calculation should favor closer places and reflect in path`() = runTest {
         val mapCenter = Location(0.0, 0.0)
         
@@ -82,6 +103,7 @@ class CalculateDriftPathUseCaseTest {
             )
         }
 
+        coEvery { repository.getIgnoredIds() } returns emptyList()
         coEvery { repository.getNearbyPlaces(any(), any(), any(), any()) } returns DataState.Success(places)
 
         val result = useCase(mapCenter, mapCenter, 1000)
@@ -115,6 +137,7 @@ class CalculateDriftPathUseCaseTest {
             rating = 4.7
         )
 
+        coEvery { repository.getIgnoredIds() } returns emptyList()
         coEvery { repository.getNearbyPlaces(any(), any(), any(), any()) } returns DataState.Success(listOf(popularFar, localClose))
 
         val result = useCase(mapCenter, mapCenter, 1000)
@@ -128,7 +151,7 @@ class CalculateDriftPathUseCaseTest {
         val mapCenter = Location(10.0, 20.0)
         val customRadius = 2500
         
-        coEvery { repository.getNearbyPlaces(mapCenter.latitude, mapCenter.longitude, customRadius, any()) } returns DataState.Success(emptyList())
+        coEvery { repository.getIgnoredIds() } returns emptyList()
         coEvery { repository.getNearbyPlaces(mapCenter.latitude, mapCenter.longitude, customRadius, any()) } returns DataState.Success(emptyList())
 
         useCase(mapCenter, null, customRadius)
@@ -144,6 +167,7 @@ class CalculateDriftPathUseCaseTest {
         val farPlace = Place(id = "far", name = "Far", location = Location(0.002, 0.002), type = PlaceType.PARK, userRatingsTotal = 100, rating = 4.0)
         val nearPlace = Place(id = "near", name = "Near", location = Location(0.001, 0.001), type = PlaceType.PARK, userRatingsTotal = 100, rating = 4.0)
 
+        coEvery { repository.getIgnoredIds() } returns emptyList()
         coEvery { repository.getNearbyPlaces(any(), any(), any(), any()) } returns DataState.Success(listOf(farPlace, nearPlace))
 
         // When startLocation is null, it should still sort by proximity to mapCenter

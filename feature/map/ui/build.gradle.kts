@@ -44,6 +44,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.material3)
+    implementation(libs.androidx.material.icons.core)
+    implementation(libs.androidx.material.icons.extended)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.maps.compose)
     implementation(libs.maps)
