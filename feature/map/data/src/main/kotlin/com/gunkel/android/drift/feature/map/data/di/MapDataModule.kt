@@ -15,6 +15,5 @@ val mapDataModule = module {
             .build()
     }
     single { get<DriftDatabase>().ignoredPlaceDao() }
-    single { ImageLoader(androidContext()) }
-    single { DriftRepository(get(), get(), get(), get(), androidContext(), get(named("MAPS_API_KEY")), get()) }
+    single { DriftRepository(get(), get(), get(), get(named("MAPS_API_KEY")), get()) }
 }

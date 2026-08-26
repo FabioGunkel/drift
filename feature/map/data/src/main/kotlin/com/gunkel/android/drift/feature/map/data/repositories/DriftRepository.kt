@@ -35,8 +35,6 @@ class DriftRepository(
     private val directionsApi: DirectionsApi,
     private val placesV1Api: PlacesV1Api,
     private val placesClient: PlacesClient,
-    private val imageLoader: ImageLoader,
-    private val context: Context,
     private val apiKey: String,
     private val ignoredPlaceDao: IgnoredPlaceDao
 ) {
@@ -74,70 +72,31 @@ class DriftRepository(
 
             val response = placesClient.searchNearby(request).await()
             
-            val places = coroutineScope {
-                response.places.map { googlePlace ->
-                    async {
-                        val placeName = googlePlace.displayName ?: "Unknown"
-                        val photoMetadata = googlePlace.photoMetadatas?.firstOrNull()
-                        var finalPhoto: Bitmap? = null
-                        
-                        if (photoMetadata != null) {
-                            try {
-                                val uriRequest = FetchResolvedPhotoUriRequest.builder(photoMetadata)
-                                    .setMaxWidth(800)
-                                    .setMaxHeight(800)
-                                    .build()
-                                val uriResponse = placesClient.fetchResolvedPhotoUri(uriRequest).await()
-                                val uri = uriResponse.uri
-                                
-                                if (uri != null) {
-                                    val coilRequest = ImageRequest.Builder(context)
-                                        .data(uri.toString())
-                                        .allowHardware(false)
-                                        .bitmapConfig(Bitmap.Config.ARGB_8888)
-                                        .size(400, 400)
-                                        .build()
-                                    
-                                    val result = imageLoader.execute(coilRequest)
-                                    val bitmap = result.image?.toBitmap()
-                                    
-                                    if (bitmap != null) {
-                                        // Google Maps InfoWindows use Software Rendering and don't support Hardware Bitmaps.
-                                        finalPhoto = if (bitmap.config == Bitmap.Config.HARDWARE) {
-                                            bitmap.copy(Bitmap.Config.ARGB_8888, false)
-                                        } else {
-                                            bitmap
-                                        }
-                                    }
-                                }
-                            } catch (e: Exception) {
-                                Log.w("DriftRepository", "[$placeName] Photo failed: ${e.message}")
-                            }
-                        }
-
-                        Place(
-                            id = googlePlace.id ?: "",
-                            name = placeName,
-                            location = Location(
-                                googlePlace.location?.latitude ?: 0.0,
-                                googlePlace.location?.longitude ?: 0.0
-                            ),
-                            description = googlePlace.editorialSummary,
-                            aiSummary = null, // Generative summary not available in current SDK version
-                            type = mapGoogleTypeToDrift(googlePlace.placeTypes),
-                            photo = finalPhoto,
-                            userRatingsTotal = googlePlace.userRatingCount ?: 0,
-                            rating = googlePlace.rating ?: 0.0
-                        ).let { place ->
-                            // Backup: If editorial summary is missing, use formatted address as description
-                            if (place.description.isNullOrBlank()) {
-                                place.copy(description = googlePlace.formattedAddress)
-                            } else {
-                                place
-                            }
-                        }
+            val places = response.places.map { googlePlace ->
+                val placeName = googlePlace.displayName ?: "Unknown"
+                val photoMetadata = googlePlace.photoMetadatas?.firstOrNull()
+                
+                Place(
+                    id = googlePlace.id ?: "",
+                    name = placeName,
+                    location = Location(
+                        googlePlace.location?.latitude ?: 0.0,
+                        googlePlace.location?.longitude ?: 0.0
+                    ),
+                    description = googlePlace.editorialSummary,
+                    aiSummary = null, // Generative summary not available in current SDK version
+                    type = mapGoogleTypeToDrift(googlePlace.placeTypes),
+                    photoMetadata = photoMetadata,
+                    userRatingsTotal = googlePlace.userRatingCount ?: 0,
+                    rating = googlePlace.rating ?: 0.0
+                ).let { place ->
+                    // Backup: If editorial summary is missing, use formatted address as description
+                    if (place.description.isNullOrBlank()) {
+                        place.copy(description = googlePlace.formattedAddress)
+                    } else {
+                        place
                     }
-                }.awaitAll()
+                }
             }
             DataState.Success(places)
         } catch (e: Exception) {

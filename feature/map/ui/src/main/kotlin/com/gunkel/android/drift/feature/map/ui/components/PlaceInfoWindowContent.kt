@@ -1,6 +1,7 @@
 package com.gunkel.android.drift.feature.map.ui.components
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,15 +25,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.ImageLoader
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.request.bitmapConfig
 import coil3.request.crossfade
+import coil3.toBitmap
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.net.FetchResolvedPhotoUriRequest
 import com.gunkel.android.affectus.theme.Affectus
 import com.gunkel.android.drift.feature.map.data.models.Place
 import com.gunkel.android.drift.feature.map.data.models.PlaceType
 import com.gunkel.android.drift.core.ui.R
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun PlaceInfoWindowContent(
@@ -43,6 +49,47 @@ fun PlaceInfoWindowContent(
     showAiSummary: Boolean = false,
     onAddClick: (() -> Unit)? = null
 ) {
+    val context = LocalContext.current
+    val placesClient = remember(context) { Places.createClient(context) }
+    val imageLoader = remember(context) { ImageLoader(context) }
+    var photoBitmap by remember(place.id) { mutableStateOf<Bitmap?>(null) }
+
+    LaunchedEffect(place.photoMetadata) {
+        val metadata = place.photoMetadata
+        if (metadata != null) {
+            try {
+                val uriRequest = FetchResolvedPhotoUriRequest.builder(metadata)
+                    .setMaxWidth(800)
+                    .setMaxHeight(800)
+                    .build()
+                val uriResponse = placesClient.fetchResolvedPhotoUri(uriRequest).await()
+                val uri = uriResponse.uri
+
+                if (uri != null) {
+                    val coilRequest = ImageRequest.Builder(context)
+                        .data(uri.toString())
+                        .allowHardware(false)
+                        .bitmapConfig(Bitmap.Config.ARGB_8888)
+                        .size(400, 400)
+                        .build()
+
+                    val result = imageLoader.execute(coilRequest)
+                    val bitmap = result.image?.toBitmap()
+                    
+                    if (bitmap != null) {
+                        photoBitmap = if (bitmap.config == Bitmap.Config.HARDWARE) {
+                            bitmap.copy(Bitmap.Config.ARGB_8888, false)
+                        } else {
+                            bitmap
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.w("PlaceInfoWindow", "[${place.name}] Photo failed: ${e.message}")
+            }
+        }
+    }
+
     Column(modifier = modifier) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -96,30 +143,13 @@ fun PlaceInfoWindowContent(
                 .background(Affectus.colors.secondary.copy(alpha = 0.05f)),
             contentAlignment = Alignment.Center
         ) {
-            if (place.photo != null) {
-                val data = place.photo
-                if (data is Bitmap) {
-                    Image(
-                        painter = remember(data) { BitmapPainter(data.asImageBitmap()) },
-                        contentDescription = place.name,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Image(
-                        painter = rememberAsyncImagePainter(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data(data)
-                                .crossfade(true)
-                                .allowHardware(false)
-                                .bitmapConfig(Bitmap.Config.ARGB_8888)
-                                .build()
-                        ),
-                        contentDescription = place.name,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                }
+            if (photoBitmap != null) {
+                Image(
+                    painter = remember(photoBitmap) { BitmapPainter(photoBitmap!!.asImageBitmap()) },
+                    contentDescription = place.name,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
             } else {
                 Icon(
                     imageVector = Icons.Default.Image,

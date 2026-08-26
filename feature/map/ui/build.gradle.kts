@@ -50,6 +50,8 @@ dependencies {
     implementation(libs.maps.compose)
     implementation(libs.maps)
     implementation(libs.play.services.location)
+    implementation(libs.places)
+    implementation(libs.play.services.coroutines)
     implementation(libs.androidx.startup)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)

@@ -1,5 +1,6 @@
 package com.gunkel.android.drift.feature.map.data.models
 
+import com.google.android.libraries.places.api.model.PhotoMetadata
 import com.gunkel.android.drift.core.common.Location
 
 data class Place(
@@ -9,7 +10,7 @@ data class Place(
     val description: String? = null,
     val aiSummary: String? = null,
     val type: PlaceType,
-    val photo: Any? = null, // Can be Bitmap, String (URL), or Uri
+    val photoMetadata: PhotoMetadata? = null,
     val userRatingsTotal: Int = 0,
     val rating: Double = 0.0
 )
