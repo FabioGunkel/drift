@@ -1,20 +1,11 @@
 package com.gunkel.android.drift.feature.map.data.repositories
 
-import android.content.Context
-import android.graphics.Bitmap
 import android.util.Log
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.CircularBounds
 import com.google.android.libraries.places.api.model.Place.Field
-import com.google.android.libraries.places.api.model.Review
-import com.google.android.libraries.places.api.net.FetchResolvedPhotoUriRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.api.net.SearchNearbyRequest
-import coil3.ImageLoader
-import coil3.request.ImageRequest
-import coil3.request.allowHardware
-import coil3.request.bitmapConfig
-import coil3.toBitmap
 import com.gunkel.android.drift.core.common.DataState
 import com.gunkel.android.drift.core.common.Location
 import com.gunkel.android.drift.core.network.api.DirectionsApi
@@ -24,9 +15,6 @@ import com.gunkel.android.drift.feature.map.data.local.entities.IgnoredPlaceEnti
 import com.gunkel.android.drift.feature.map.data.models.Place
 import com.gunkel.android.drift.feature.map.data.models.PlaceType
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -56,7 +44,6 @@ class DriftRepository(
                 Field.USER_RATING_COUNT,
                 Field.RATING,
                 Field.EDITORIAL_SUMMARY,
-                Field.PHOTO_METADATAS,
                 Field.FORMATTED_ADDRESS
             )
             
@@ -74,7 +61,6 @@ class DriftRepository(
             
             val places = response.places.map { googlePlace ->
                 val placeName = googlePlace.displayName ?: "Unknown"
-                val photoMetadata = googlePlace.photoMetadatas?.firstOrNull()
                 
                 Place(
                     id = googlePlace.id ?: "",
@@ -83,20 +69,13 @@ class DriftRepository(
                         googlePlace.location?.latitude ?: 0.0,
                         googlePlace.location?.longitude ?: 0.0
                     ),
-                    description = googlePlace.editorialSummary,
-                    aiSummary = null, // Generative summary not available in current SDK version
+                    description = googlePlace.editorialSummary ?: googlePlace.formattedAddress,
+                    aiSummary = null,
                     type = mapGoogleTypeToDrift(googlePlace.placeTypes),
-                    photoMetadata = photoMetadata,
+                    photoMetadata = null, // Photo API remains disabled to avoid costs
                     userRatingsTotal = googlePlace.userRatingCount ?: 0,
                     rating = googlePlace.rating ?: 0.0
-                ).let { place ->
-                    // Backup: If editorial summary is missing, use formatted address as description
-                    if (place.description.isNullOrBlank()) {
-                        place.copy(description = googlePlace.formattedAddress)
-                    } else {
-                        place
-                    }
-                }
+                )
             }
             DataState.Success(places)
         } catch (e: Exception) {
@@ -139,7 +118,7 @@ class DriftRepository(
             IgnoredPlaceEntity(
                 id = place.id,
                 title = place.name,
-                photoReference = null // In a real scenario, we might want to store a photo reference or URL
+                photoReference = null
             )
         )
     }

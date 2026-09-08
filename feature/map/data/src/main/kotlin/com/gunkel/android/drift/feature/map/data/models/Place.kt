@@ -11,6 +11,8 @@ data class Place(
     val aiSummary: String? = null,
     val type: PlaceType,
     val photoMetadata: PhotoMetadata? = null,
+    val iconMaskUri: String? = null,
+    val iconBackgroundColor: String? = null,
     val userRatingsTotal: Int = 0,
     val rating: Double = 0.0
 )
