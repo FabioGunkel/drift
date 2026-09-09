@@ -10,7 +10,9 @@ import com.gunkel.android.drift.core.common.DataState
 import com.gunkel.android.drift.core.common.Location
 import com.gunkel.android.drift.core.network.api.DirectionsApi
 import com.gunkel.android.drift.core.network.api.PlacesV1Api
+import com.gunkel.android.drift.feature.map.data.local.dao.CategorySettingDao
 import com.gunkel.android.drift.feature.map.data.local.dao.IgnoredPlaceDao
+import com.gunkel.android.drift.feature.map.data.local.entities.CategorySettingEntity
 import com.gunkel.android.drift.feature.map.data.local.entities.IgnoredPlaceEntity
 import com.gunkel.android.drift.feature.map.data.models.Place
 import com.gunkel.android.drift.feature.map.data.models.PlaceType
@@ -24,7 +26,8 @@ class DriftRepository(
     private val placesV1Api: PlacesV1Api,
     private val placesClient: PlacesClient,
     private val apiKey: String,
-    private val ignoredPlaceDao: IgnoredPlaceDao
+    private val ignoredPlaceDao: IgnoredPlaceDao,
+    private val categorySettingDao: CategorySettingDao
 ) {
     suspend fun getNearbyPlaces(
         lat: Double,
@@ -126,6 +129,16 @@ class DriftRepository(
     suspend fun removeIgnoredPlace(id: String) = ignoredPlaceDao.deleteById(id)
 
     suspend fun getIgnoredIds(): List<String> = ignoredPlaceDao.getIgnoredIds()
+
+    fun getCategorySettings(): Flow<List<CategorySettingEntity>> = categorySettingDao.getAllSettings()
+
+    suspend fun updateCategorySetting(categoryName: String, isEnabled: Boolean) {
+        categorySettingDao.insertSetting(CategorySettingEntity(categoryName, isEnabled))
+    }
+
+    suspend fun isCategoryEnabled(categoryName: String): Boolean {
+        return categorySettingDao.isCategoryEnabled(categoryName) ?: true
+    }
 
     suspend fun getPlaceReviewSummary(placeId: String): String? {
         return try {

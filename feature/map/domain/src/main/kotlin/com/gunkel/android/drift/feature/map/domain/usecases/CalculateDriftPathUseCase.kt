@@ -26,18 +26,37 @@ class CalculateDriftPathUseCase(
             "tourist_attraction", "museum", "art_gallery", "park", "library", "church", "historical_landmark", 
             "market"
         )
+        
+        val isMuseumEnabled = repository.isCategoryEnabled(PlaceType.MUSEUM.name)
+        val isParkEnabled = repository.isCategoryEnabled(PlaceType.PARK.name)
+        val isTouristAttractionEnabled = repository.isCategoryEnabled(PlaceType.TOURIST_ATTRACTION.name)
+        val isHistoricSiteEnabled = repository.isCategoryEnabled(PlaceType.HISTORIC_SITE.name)
+        val isRestaurantEnabled = repository.isCategoryEnabled(PlaceType.RESTAURANT.name)
+
         val landmarksResult = repository.getNearbyPlaces(searchCenter.latitude, searchCenter.longitude, radius, landmarkTypes)
         
         val restaurantTypes = listOf("restaurant", "cafe", "bar")
-        val restaurantsResult = repository.getNearbyPlaces(searchCenter.latitude, searchCenter.longitude, radius, restaurantTypes)
+        val restaurantsResult = if (isRestaurantEnabled) {
+            repository.getNearbyPlaces(searchCenter.latitude, searchCenter.longitude, radius, restaurantTypes)
+        } else {
+            DataState.Success(emptyList())
+        }
         
         if (landmarksResult is DataState.Error) {
             return DataState.Error("Failed to fetch landmarks: ${landmarksResult.message}")
         }
         
         val allLandmarks = (landmarksResult as DataState.Success).data
-            .filter { it.type != PlaceType.RESTAURANT && it.type != PlaceType.OTHER && it.type != PlaceType.STORE }
             .filter { it.id !in ignoredIds }
+            .filter { 
+                when (it.type) {
+                    PlaceType.MUSEUM -> isMuseumEnabled
+                    PlaceType.PARK -> isParkEnabled
+                    PlaceType.TOURIST_ATTRACTION -> isTouristAttractionEnabled
+                    PlaceType.HISTORIC_SITE -> isHistoricSiteEnabled
+                    else -> false
+                }
+            }
         
         val top10Landmarks = allLandmarks
             .sortedByDescending { calculateScore(it, searchCenter, radius) }
@@ -48,7 +67,7 @@ class CalculateDriftPathUseCase(
         
         val selectedStops = top10Landmarks.toMutableList()
 
-        if (!hasRestaurantsInLandmarks) {
+        if (!hasRestaurantsInLandmarks && isRestaurantEnabled) {
             val allRestaurants = if (restaurantsResult is DataState.Success) {
                 restaurantsResult.data.filter { it.type == PlaceType.RESTAURANT && it.id !in ignoredIds }
             } else emptyList()

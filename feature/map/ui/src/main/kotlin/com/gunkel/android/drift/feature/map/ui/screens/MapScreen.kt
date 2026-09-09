@@ -13,7 +13,7 @@ import org.koin.androidx.compose.koinViewModel
 @SuppressLint("MissingPermission")
 @Composable
 fun MapScreen(
-    onNavigateToIgnored: () -> Unit,
+    onNavigateToSettings: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MapViewModel = koinViewModel()
 ) {
@@ -38,7 +38,7 @@ fun MapScreen(
         onDriftClick = { radius, mapCenter ->
             viewModel.onDriftClicked(mapCenter, userLocation, radius)
         },
-        onNavigateToIgnored = onNavigateToIgnored,
+        onNavigateToSettings = onNavigateToSettings,
         modifier = modifier
     )
 }

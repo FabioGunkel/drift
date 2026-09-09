@@ -18,10 +18,11 @@ val mapDataModule = module {
             .build()
     }
     single { get<DriftDatabase>().ignoredPlaceDao() }
+    single { get<DriftDatabase>().categorySettingDao() }
     
     single { get<Retrofit>().create(DirectionsApi::class.java) }
     single { get<Retrofit>().create(PlacesV1Api::class.java) }
     single { Places.createClient(androidContext()) }
 
-    single { DriftRepository(get(), get(), get(), get(named("MAPS_API_KEY")), get()) }
+    single { DriftRepository(get(), get(), get(), get(named("MAPS_API_KEY")), get(), get()) }
 }

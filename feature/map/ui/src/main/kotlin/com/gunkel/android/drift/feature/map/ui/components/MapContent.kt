@@ -38,7 +38,7 @@ import com.gunkel.android.drift.feature.map.ui.viewmodels.DriftUiState
 fun MapContent(
     uiState: DriftUiState,
     onDriftClick: (Int, Location) -> Unit,
-    onNavigateToIgnored: () -> Unit,
+    onNavigateToSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -88,8 +88,8 @@ fun MapContent(
             TopAppBar(
                 title = { Text("Drift", style = Affectus.typography.titleLarge) },
                 actions = {
-                    IconButton(onClick = onNavigateToIgnored) {
-                        Icon(Icons.Default.Settings, contentDescription = "Ignorados")
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(Icons.Default.Settings, contentDescription = "Configurações")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
