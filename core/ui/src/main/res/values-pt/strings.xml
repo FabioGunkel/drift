@@ -1,0 +1,14 @@
+<resources>
+    <!-- Place Types -->
+    <string name="place_type_museum">Museu</string>
+    <string name="place_type_park">Parque</string>
+    <string name="place_type_tourist_attraction">Atração Turística</string>
+    <string name="place_type_historic_site">Sítio Histórico</string>
+    <string name="place_type_restaurant">Restaurante</string>
+    <string name="place_type_store">Loja</string>
+    <string name="place_type_other">Local de interesse</string>
+
+    <string name="drift_button_label">A Deriva</string>
+    <string name="app_display_name">DERIVA</string>
+    <string name="app_slogan">Descubra o caminho seguro</string>
+</resources>

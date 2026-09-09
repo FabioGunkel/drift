@@ -1,0 +1,5 @@
+<resources>
+    <string name="drift_button_label">Drift</string>
+    <string name="app_display_name">DRIFT</string>
+    <string name="app_slogan">Discover the safe way</string>
+</resources>
