@@ -1,10 +1,18 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import java.util.Properties
 
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.maps.plugin)
+}
+
+val releaseProperties = Properties().apply {
+    val propertiesFile = rootProject.file(".secrets/release.properties")
+    if (propertiesFile.exists()) {
+        load(propertiesFile.inputStream())
+    }
 }
 
 android {
@@ -21,6 +29,14 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("../.secrets/upload")
+            storePassword = releaseProperties.getProperty("RELEASE_STORE_PASSWORD")?.trim()
+            keyAlias = releaseProperties.getProperty("RELEASE_KEY_ALIAS")?.trim() ?: "upload"
+            keyPassword = releaseProperties.getProperty("RELEASE_KEY_PASSWORD")?.trim()
+        }
+    }
 
     buildTypes {
         getByName("debug") {
@@ -33,12 +49,13 @@ android {
         
         getByName("release") {
             isMinifyEnabled = true
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 
     secrets {
-        propertiesFileName = ".secrets/debug.properties"
+        propertiesFileName = ".secrets/release.properties"
         defaultPropertiesFileName = ".secrets/local.properties"
     }
     compileOptions {
